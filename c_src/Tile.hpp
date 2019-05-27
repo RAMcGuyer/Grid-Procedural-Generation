@@ -105,7 +105,7 @@ class Tile public {
         }
 
         void setDistance(int distance) {   
-            this.distance = distance;
+            this->distance = distance;
         }
         
         int getDistance() {
