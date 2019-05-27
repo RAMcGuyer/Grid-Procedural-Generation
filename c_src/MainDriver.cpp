@@ -104,10 +104,10 @@ void testPaths() {
     cout << "Empty grid: \n\n" << grid.toString() << endl;
 
     Path path = Path(grid);
-    assert path.addJoint(Coord2D(10,1));
-    assert path.addJoint(Coord2D(10, 2));
-    assert path.addJoint(Coord2D(30, 2));
-    assert path.addJoint(Coord2D(30, 0));
+    assert(path.addJoint(Coord2D(10,1));
+    assert(path.addJoint(Coord2D(10, 2)));
+    assert(path.addJoint(Coord2D(30, 2));
+    assert(path.addJoint(Coord2D(30, 0)));
 
     path.setPathType(TileType::TRAVERSABLE, true);
 
