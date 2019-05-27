@@ -300,6 +300,9 @@ void Grid2D::setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType ty
 		Coord2D thisRowRight = new Coord2D(upperRight.getX(), thisY);
 
 		setTypeLine(thisRowLeft, thisRowRight, type, prioritize);
+
+		delete thisRowLeft;
+		delete thisRowRight;
 	}
 }
 
@@ -315,12 +318,18 @@ void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
 
+			delete point1Layered;
+			delete point2Layered;
+
 			// Do row on bot, offset by thisLevel
 			point1Layered = new Coord2D(point1.getX(), point1.getY() - thisLevel);
 			point2Layered = new Coord2D(point2.getX(), point2.getY() - thisLevel);
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
+
+			delete point1Layered;
+			delete point2Layered;
 		}
 
 		// Col (vertical)
@@ -333,12 +342,18 @@ void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
 
+			delete point1Layered;
+			delete point2Layered;
+
 			// Do col on right, offset by thisLevel
 			point1Layered = new Coord2D(point1.getX() + thisLevel, point1.getY());
 			point2Layered = new Coord2D(point1.getX() + thisLevel, point2.getY());
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
+
+			delete point1Layered;
+			delete point2Layered;
 		}
 
 		else
@@ -367,6 +382,9 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 		Coord2D thisRowRight = new Coord2D(upperRight.getX(), thisY);
 
 		markLine(thisRowLeft, thisRowRight, mark);
+
+		delete thisRowLeft;
+		delete thisRowRight;
 	}
 }
 
