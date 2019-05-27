@@ -119,23 +119,23 @@ std::string Grid2D::toString() {
 	return sb;
 }
 
-void setTile(Tile.TileType t, Coord2D location) {
+void Grid2D::setTile(Tile.TileType t, Coord2D location) {
 	assertBounds(location);
 
 	grid[location.getY()][location.getX()] = new Tile(t, new Coord2D(location));
 }
 
-Tile getTile(Coord2D location) {
+Tile Grid2D::getTile(Coord2D location) {
 	assertBounds(location);
 
 	return grid[location.getY()][location.getX()];
 }
 
-void assertBounds(Coord2D location) {
+void Grid2D::assertBounds(Coord2D location) {
 	assert(checkBounds(location));
 }
 
-bool checkBounds(Coord2D location) {
+bool Grid2D::checkBounds(Coord2D location) {
 	int x = location.getX();
 	int y = location.getY();
 
@@ -145,53 +145,53 @@ bool checkBounds(Coord2D location) {
 	return x < COLS && y < ROWS;
 }
 
-Coord2D getGridDimensions() {
+Coord2D Grid2D::getGridDimensions() {
 	return new Coord2D(COLS, ROWS);
 }
 
-int size() {
+int Grid2D::size() {
 	return ROWS * COLS;
 }
 
-char getChar(Coord2D location) {
+char Grid2D::getChar(Coord2D location) {
 	return getTile(location).getChar();
 }
 
-bool canGoUp(Coord2D location) {
+bool Grid2D::canGoUp(Coord2D location) {
 	return location.getY() < ROWS - 1;
 }
 
-bool canGoDown(Coord2D location) {
+bool Grid2D::canGoDown(Coord2D location) {
 	return location.getY() > 0;
 }
 
-bool canGoLeft(Coord2D location) {
+bool Grid2D::canGoLeft(Coord2D location) {
 	return location.getX() > 0;
 }
 
-bool canGoRight(Coord2D location) {
+bool Grid2D::canGoRight(Coord2D location) {
 	return location.getX() < COLS - 1;
 }
 
-Tile getUp(Coord2D fromHere) {
+Tile Grid2D::getUp(Coord2D fromHere) {
 	if (!canGoUp(fromHere)) return null;
 
 	return getTile(new Coord2D(fromHere.getX(), fromHere.getY() + 1));
 }
 
-Tile getDown(Coord2D fromHere) {
+Tile Grid2D::getDown(Coord2D fromHere) {
 	if (!canGoDown(fromHere)) return null;
 
 	return getTile(new Coord2D(fromHere.getX(), fromHere.getY() - 1));
 }
 
-Tile getLeft(Coord2D fromHere) {
+Tile Grid2D::getLeft(Coord2D fromHere) {
 	if (!canGoLeft(fromHere)) return null;
 
 	return getTile(new Coord2D(fromHere.getX() - 1, fromHere.getY()));
 }
 
-Tile getRight(Coord2D fromHere) {
+Tile Grid2D::getRight(Coord2D fromHere) {
 	if (!canGoRight(fromHere)) return null;
 
 	return getTile(new Coord2D(fromHere.getX() + 1, fromHere.getY()));
@@ -203,7 +203,7 @@ Tile getRight(Coord2D fromHere) {
  * @param point1 an endpoint
  * @param point2 another endpoint
  */
-void markLine(Coord2D point1, Coord2D point2, bool mark) {
+void Grid2D::markLine(Coord2D point1, Coord2D point2, bool mark) {
 	assertBounds(point1);
 	assertBounds(point2);
 
@@ -232,7 +232,7 @@ void markLine(Coord2D point1, Coord2D point2, bool mark) {
 	}
 }
 
-void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, bool prioritize) {
+void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, bool prioritize) {
 	assertBounds(point1);
 	assertBounds(point2);
 
@@ -278,7 +278,7 @@ void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, bool priori
 	}
 }
 
-void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType type, bool prioritize) {
+void Grid2D::setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType type, bool prioritize) {
 	assertBounds(lowerLeft);
 	assertBounds(upperRight);
 
@@ -303,7 +303,7 @@ void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType type, bool
 	}
 }
 
-void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int layers, bool prioritize) {
+void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int layers, bool prioritize) {
 	for (int thisLevel = 0; thisLevel <= layers; thisLevel++) {
 
 		// Row (horizontal)
@@ -346,7 +346,7 @@ void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int layers,
 	}
 }
 
-void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
+void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	assertBounds(lowerLeft);
 	assertBounds(upperRight);
 
@@ -370,7 +370,7 @@ void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	}
 }
 
-std::unordered_set<Tile> getTraversableNeighbors(Coord2D location) {
+std::unordered_set<Tile> Grid2D::getTraversableNeighbors(Coord2D location) {
 	std::unordered_set<Tile> neighbors;
 
 	if (canGoUp(location)) {
