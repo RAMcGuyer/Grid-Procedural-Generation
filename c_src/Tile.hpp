@@ -1,6 +1,8 @@
+#ifndef TILE_H
+#define TILE_H
 #include <string>
 #include <climits>
-
+#include "Coord2D.h"
 using namespace std;
 
 class Tile public {
@@ -95,9 +97,10 @@ class Tile public {
 
         string toString() {
             // returns string: "TileType <type>, <_ OR not> marked, distance = <distance>, location <location>"
-            string type = (string[]){"EMPTY","TRAVERSABLE","NON_TRAVERSABLE"}[this->type];
-            string info;
-            // string info = "TileType " + type + ", " + (marked ? "":"not ") + "marked, distance" 
+            string typestr = (string[]){"EMPTY","TRAVERSABLE","NON_TRAVERSABLE"}[this->type];
+            string info = "";
+            info.append("TileType ").append(typestr).append(", ").append(marked ? "":"not ").append(
+                "marked, distance = ").append(distance).append(", location ").append(location.toString()); // does location have a custom toString defined?
             return info;
         }
 
@@ -121,3 +124,4 @@ class Tile public {
             return location;
         }
 };
+#endif
