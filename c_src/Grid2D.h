@@ -34,9 +34,9 @@ class Grid2D {
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
 		std::unordered_set<Tile> getTraversableNeighbors(Coord2D location);
 
-		begin();
-		end();
-		next();
+		// begin();
+		// end();
+		// next();
 	private:	
 		private const int ROWS;
 		private const int COLS;

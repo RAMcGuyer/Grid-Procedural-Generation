@@ -1,4 +1,6 @@
 #include <string>
+#include <climits>
+
 using namespace std;
 
 class Tile public {
@@ -20,6 +22,7 @@ class Tile public {
             this->marked=false;
             this->type=TileType::EMPTY;
             this->distance=INT_MAX; // FIXME: does this work?
+                                    // after adding <climits> it should! - Signed: Andrew
             this->prev=NULL;
         }
         Tile(TileType type) {
@@ -35,6 +38,7 @@ class Tile public {
             this->distance=INT_MAX; 
             this->prev=NULL;
             this->location=new Coord2D(location); // FIXME: dont forget to delete
+                                                  // done - Signed: Andrew
         }
         Tile(TileType type, bool mark) {
             this->marked=mark;
