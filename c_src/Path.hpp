@@ -2,6 +2,7 @@
 #include <list>
 #include <iterator>
 #include <unordered_set>
+#include <climits>
 #include "Grid2D.h"
 #include "Tile.h"
 using namespace std;
@@ -114,6 +115,58 @@ class Path public {
             }
 
             Tile uTile = NULL;
+
+            while(!setQ.empty()) {
+                int runningMin = INT_MAX;
+                for (Tile t : setQ) {
+                    if(t.getDistance() < runningMin) {
+                        runningMin = t.getDistance();
+                        uTile = t;
+                    }
+                }
+
+                if(uTile == NULL) {
+                    cout << "Minimum distance tile uTile not properly set" << endl;
+                    exit(1);
+                }
+                if(setQ.find(uTile) == setQ.end()) {
+                    cout << "setQ doesn't contain uTile " << uTile.toString() << endl;
+                    exit(1);
+                }
+
+                if(uTile == destTile) {
+                    break;
+                }
+
+                unordered_set<Tile> uNeighbors = tempGrid.getTraversableNeighbors(uTile.getLocation());
+
+                for (Tile thisNeighbor : uNeighbors) {
+                    int currentDist = uTile.getDistance() + 1;
+                    if (currentDist < thisNeighbor.getDistance()) {
+                        thisNeighbor.setDistance(currentDist);
+                        thisNeighbor.setPreviousTile(uTile);
+                    }
+                }
+            }
+
+            if (uTile.getPreviousTile() == NULL || uTile == srcTile) {
+                cout << "Condition specified by Dijkstra's not met" << endl;
+                exit(1);
+            }
+
+            while(uTile != NULL) {
+                joints.push_back(uTile.getLocation());
+                uTile = uTile.getPreviousTile();
+
+                if (uTile == NULL && joints.size() < 2) {
+                    cout << "Not enough prev's? FOr sure not enough joints\n
+                    Perhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
+                    "dest: " << dest.toString() << "\n" <<
+                    "src.equals(dest)? " << src.equals(dest);
+
+                    exit(1);
+                }
+            }
         }
 
 
