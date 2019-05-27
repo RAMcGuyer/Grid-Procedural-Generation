@@ -49,6 +49,10 @@ class Tile public {
             this->prev=NULL;
         }
 
+        ~Tile() {
+            delete location;
+        }
+
         char getChar() {
             if (isMarked()) {
                 return '*';
