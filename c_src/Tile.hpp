@@ -2,7 +2,7 @@
 #define TILE_H
 #include <string>
 #include <climits>
-#include "Coord2D.h"
+#include "Coord2D.hpp"
 using namespace std;
 
 class Tile public {

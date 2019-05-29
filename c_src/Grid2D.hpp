@@ -2,8 +2,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "Tile.h"
-#include "Coord2D.h"
+#include "Tile.hpp"
+#include "Coord2D.hpp"
 
 class Grid2D {
 	public:

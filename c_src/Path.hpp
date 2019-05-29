@@ -3,8 +3,8 @@
 #include <iterator>
 #include <unordered_set>
 #include <climits>
-#include "Grid2D.h"
-#include "Tile.h"
+#include "Grid2D.hpp"
+#include "Tile.hpp"
 using namespace std;
 
 class Path public {
