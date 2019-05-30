@@ -1,6 +1,9 @@
 
 #ifndef __COORD2D_H__
 #define __COORD2D_H__
+#include <stdlib.h>
+#include <string>
+
 public class Coord2D {
 //Coord2D is a coordinate object that enables us to keep track of
 // which tiles in our grid our landmarks.
@@ -29,7 +32,7 @@ public class Coord2D {
     }
 
 //Displays contents of object to the console.
-    public String toString() {
+    public string toString() {
         
         return "{" + Integer.toString(x) + ", " + Integer.toString(y) + "}";
     }
