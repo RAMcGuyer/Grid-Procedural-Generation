@@ -34,7 +34,7 @@ public class Coord2D {
 //Displays contents of object to the console.
     public string toString() {
         
-        return "{" + Integer.toString(x) + ", " + Integer.toString(y) + "}";
+        return "{" + std::to_string(x) + ", " + std::to_String(y) + "}";
     }
 
 //Comparator function    
@@ -48,7 +48,9 @@ public class Coord2D {
             return this.x == otherCoord.x && this.y == otherCoord.y;
         }
         
-        else return false;
+        else{ 
+            return false;
+        }
     }
 
 //For use in the hashset
