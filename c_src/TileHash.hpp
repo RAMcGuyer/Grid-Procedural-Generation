@@ -1,11 +1,8 @@
-#ifndef __TILEHASH_H__
-#define __TILEHASH_H__
+#ifndef __HASH_HPP__
+#define __HASH_HPP__
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
-
-struct TileHasher;
-struct TileComparator;
 
 struct TileHasher {
     size_t operator()(const Tile& tileObj) const {
@@ -24,6 +21,24 @@ struct TileComparator {
 		else {
 			return false;
 		}
+	}
+};
+
+struct Coord2DHasher {
+	size_t operator()(const Coord2D& coord2D) const {
+		return std::hash<int>()(coord2D.hashCode());
+	}
+};
+
+struct Coord2DComparator {
+	bool operator()(const Coord2D& obj1, const Coord2D& obj2) {
+		if(
+			obj1.getX() == obj2.getX()
+			&& obj1.getY() == obj2.getY()
+		) {
+			return true;
+		}
+		return false;
 	}
 };
 #endif
