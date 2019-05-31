@@ -9,10 +9,11 @@
 
 #include "Grid2D.hpp"
 #include "Tile.hpp"
+#include "Hash.hpp"
 
 using namespace std;
 
-class Path public {
+class Path {
     private:
         Grid2D grid;
         list<Coord2D> joints;
