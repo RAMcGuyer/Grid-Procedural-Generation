@@ -5,19 +5,20 @@
 #include "Coord2D.hpp"
 using namespace std;
 
-class Tile public {
-    enum TileType{
-        EMPTY,
-        TRAVERSABLE,
-        NON_TRAVERSABLE
-    };
+class Tile {
+    public:
+        enum TileType{
+            EMPTY,
+            TRAVERSABLE,
+            NON_TRAVERSABLE
+        };
 
     private:
         bool marked;
         TileType type;
         int distance;
-        Tile prev;
-        Coord2D location;
+        Tile* prev; 
+        Coord2D* location;
 
     public:
         Tile() {
@@ -26,6 +27,7 @@ class Tile public {
             this->distance=INT_MAX; // FIXME: does this work?
                                     // after adding <climits> it should! - Signed: Andrew
             this->prev=NULL;
+            this->location=NULL;
         }
         Tile(TileType type) {
             this->marked=false;
@@ -48,7 +50,7 @@ class Tile public {
             this->distance=INT_MAX;
             this->prev=NULL;
         }
-        Tile(Tile t) {
+        Tile(const Tile& t) {
             this->marked=t.marked;
             this->type=t.type;
             this->distance=INT_MAX;
@@ -98,10 +100,11 @@ class Tile public {
         string toString() {
             // returns string: "TileType <type>, <_ OR not> marked, distance = <distance>, location <location>"
             string typestr = (string[]){"EMPTY","TRAVERSABLE","NON_TRAVERSABLE"}[this->type];
-            string info = "";
-            info.append("TileType ").append(typestr).append(", ").append(marked ? "":"not ").append(
-                "marked, distance = ").append(distance).append(", location ").append(location.toString()); // does location have a custom toString defined?
-            return info;
+            // string info = "";
+            // info.append("TileType ").append(typestr).append(", ").append(marked ? "":"not ").append(
+            //     "marked, distance = ").append(distance).append(", location ").append(location.toString()); // does location have a custom toString defined?
+            // return info;
+            return "TileType " + typestr + ", " + (marked ? "": "not ") + "marked, distance = " + std::to_string(distance) + ", location " + location->toString();
         }
 
         void setDistance(int distance) {   
@@ -112,15 +115,15 @@ class Tile public {
             return distance;
         }
         
-        void setPreviousTile(Tile prev) {
+        void setPreviousTile(Tile* prev) {
             this->prev = prev;
         }
         
-        Tile getPreviousTile() {
+        Tile* getPreviousTile() {
             return prev;
         }
         
-        Coord2D getLocation() {    
+        Coord2D* getLocation() {    
             return location;
         }
 };
