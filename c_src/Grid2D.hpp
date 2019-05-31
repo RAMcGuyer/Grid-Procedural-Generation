@@ -6,6 +6,9 @@
 #include "Tile.hpp"
 #include "Coord2D.hpp"
 
+struct TileHasher;
+struct TileComparator;
+
 class Grid2D {
 	public:
 		Grid2D(Coord2D dimensions);
@@ -33,7 +36,7 @@ class Grid2D {
 		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize);
 		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize);
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
-		std::unordered_set<Tile> getTraversableNeighbors(Coord2D location);
+		std::unordered_set<Tile, TileHasher, TileComparator> getTraversableNeighbors(Coord2D location);
 
 		// begin();
 		// end();
@@ -43,6 +46,27 @@ class Grid2D {
 		int COLS;
 	protected: 
 		vector<vector<Tile> >* grid;
+};
+
+struct TileHasher
+{
+	size_t operator()(const Tile& tileObj) const {
+		return std::hash<int>()(tileObj.getLocation()->hashCode());
+	}
+};
+
+struct TileComparator {
+	bool operator()(const Tile& tileObj1, const Tile& tileObj2) const {
+		if(
+			tileObj1.getLocation()->getX() == tileObj2.getLocation()->getX()
+			&& tileObj1.getLocation()->getY() == tileObj2.getLocation()->getY()
+		) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 };
 
 Grid2D::Grid2D(Coord2D dimensions) {
@@ -369,8 +393,8 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	}
 }
 
-std::unordered_set<Tile> Grid2D::getTraversableNeighbors(Coord2D location) {
-	std::unordered_set<Tile> neighbors;
+std::unordered_set<Tile, TileHasher, TileComparator> Grid2D::getTraversableNeighbors(Coord2D location) {
+	std::unordered_set<Tile, TileHasher, TileComparator> neighbors;
 
 	if (canGoUp(location)) {
 		Tile* upNeighbor = getUp(location);
