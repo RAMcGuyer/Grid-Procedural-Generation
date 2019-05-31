@@ -1,6 +1,3 @@
-#ifndef __GRID2D_H__
-#define __GRID2D_H__
-
 #include <cassert>
 #include <string>
 #include <unordered_set>
@@ -8,7 +5,7 @@
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
-#include "TileHash.hpp"
+#include "Hash.hpp"
 
 class Grid2D {
 	public:
@@ -406,5 +403,3 @@ std::unordered_set<Tile, TileHasher, TileComparator> Grid2D::getTraversableNeigh
 
 	return neighbors;
 }
-
-#endif //__GRID2D_H__
