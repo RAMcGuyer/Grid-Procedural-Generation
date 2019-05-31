@@ -1,63 +1,58 @@
 
 #ifndef __COORD2D_H__
 #define __COORD2D_H__
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <string>
+#include <typeinfo>
 
-public class Coord2D {
+class Coord2D {
 //Coord2D is a coordinate object that enables us to keep track of
 // which tiles in our grid our landmarks.
-    private int x;
-    private int y;
+    private: 
+        int x;
+        int y;
 
-//Constructors, take in an X and a Y coordinate.
-    public Coord2D(int x, int y) {
-
-        this.x = x;
-        this.y = y;
-    }
-// Constructor that creates a deep copy of a coordinate object
-    public Coord2D(Coord2D other) {
-        
-        this.x = other.x;
-        this.y = other.y;
-    }
-//Getters    
-    public int getX() {
-        return x;
-    }
-    
-    public int getY() {
-        return y;
-    }
-
-//Displays contents of object to the console.
-    public string toString() {
-        
-        return "{" + std::to_string(x) + ", " + std::to_String(y) + "}";
-    }
-
-//Comparator function    
-    public bool equals(Object other) {
-        
-//        return this.x == other.x && this.y == other.y;
-        if (other instanceof Coord2D) {
-            
-            Coord2D otherCoord = (Coord2D) other;
-            
-            return this.x == otherCoord.x && this.y == otherCoord.y;
+    public:
+        //Constructors, take in an X and a Y coordinate.
+        Coord2D(int x, int y) {
+            this->x = x;
+            this->y = y;
+        }
+        // Constructor that creates a deep copy of a coordinate object
+        Coord2D(const Coord2D& other) {
+            this->x = other.x;
+            this->y = other.y;
+        }
+        //Getters    
+        int getX() {
+            return x;
         }
         
-        else{ 
-            return false;
+        int getY() {
+            return y;
         }
-    }
 
-//For use in the hashset
-    public int hashCode() {
-        
-        return x + y;
-    }
-    
-}
+        //Displays contents of object to the console.
+        std::string toString() {
+            return "{" + std::to_string(x) + ", " + std::to_string(y) + "}";
+        }
+
+        //Comparator function   
+        template <class T>
+        bool equals(T other) {    
+            //return this.x == other.x && this.y == other.y;
+            if ( (typeid(other)==typeid(Coord2D)) ) {
+                Coord2D otherCoord = (Coord2D) other;
+                return this->x == otherCoord.x && this->y == otherCoord.y;
+            }
+            else{ 
+                return false;
+            }
+        }
+
+        //For use in the hashset
+        int hashCode() {
+            return x + y;
+        }
+};
 #endif
