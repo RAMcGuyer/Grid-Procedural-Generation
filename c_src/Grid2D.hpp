@@ -5,9 +5,7 @@
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
-
-struct TileHasher;
-struct TileComparator;
+#include "TileHash.hpp"
 
 class Grid2D {
 	public:
@@ -46,27 +44,6 @@ class Grid2D {
 		int COLS;
 	protected: 
 		vector<vector<Tile> >* grid;
-};
-
-struct TileHasher
-{
-	size_t operator()(const Tile& tileObj) const {
-		return std::hash<int>()(tileObj.getLocation()->hashCode());
-	}
-};
-
-struct TileComparator {
-	bool operator()(const Tile& tileObj1, const Tile& tileObj2) const {
-		if(
-			tileObj1.getLocation()->getX() == tileObj2.getLocation()->getX()
-			&& tileObj1.getLocation()->getY() == tileObj2.getLocation()->getY()
-		) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 };
 
 Grid2D::Grid2D(Coord2D dimensions) {
