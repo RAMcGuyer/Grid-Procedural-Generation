@@ -6,11 +6,12 @@
 using namespace std;
 
 class Tile {
-    enum TileType{
-            EMPTY,
-            TRAVERSABLE,
-            NON_TRAVERSABLE
-        };
+    public:
+        enum TileType{
+                EMPTY,
+                TRAVERSABLE,
+                NON_TRAVERSABLE
+            };
         
     public:
         Tile();
