@@ -1,6 +1,6 @@
-
 #ifndef __COORD2D_H__
 #define __COORD2D_H__
+
 #include <stdlib.h> 
 #include <string>
 #include <typeinfo>
@@ -55,4 +55,5 @@ class Coord2D {
             return x + y;
         }
 };
-#endif
+
+#endif  //__COORD2D_H__

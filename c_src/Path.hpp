@@ -1,10 +1,15 @@
+#ifndef __PATH_H__
+#define __PATH_H__
+
 #include <iostream>
 #include <list>
 #include <iterator>
 #include <unordered_set>
 #include <climits>
+
 #include "Grid2D.hpp"
 #include "Tile.hpp"
+
 using namespace std;
 
 class Path public {
@@ -170,3 +175,5 @@ class Path public {
 
 
 };
+
+#endif // __PATH_H__
