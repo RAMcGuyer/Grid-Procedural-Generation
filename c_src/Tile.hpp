@@ -123,7 +123,7 @@ class Tile {
             return prev;
         }
         
-        Coord2D* getLocation() {    
+        Coord2D* getLocation() const {    
             return location;
         }
 };

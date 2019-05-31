@@ -8,6 +8,7 @@
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
+#include "TileHash.hpp"
 
 class Grid2D {
 	public:
@@ -36,7 +37,7 @@ class Grid2D {
 		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize);
 		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize);
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
-		std::unordered_set<Tile> getTraversableNeighbors(Coord2D location);
+		std::unordered_set<Tile, TileHasher, TileComparator> getTraversableNeighbors(Coord2D location);
 
 		// begin();
 		// end();
@@ -372,8 +373,8 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	}
 }
 
-std::unordered_set<Tile> Grid2D::getTraversableNeighbors(Coord2D location) {
-	std::unordered_set<Tile> neighbors;
+std::unordered_set<Tile, TileHasher, TileComparator> Grid2D::getTraversableNeighbors(Coord2D location) {
+	std::unordered_set<Tile, TileHasher, TileComparator> neighbors;
 
 	if (canGoUp(location)) {
 		Tile* upNeighbor = getUp(location);
