@@ -7,7 +7,7 @@
 #include <vector>
 #include "Coord2D.hpp"
 #include "Grid2D.hpp"
-
+#include "TileHash.hpp"
 using namespace std;
 using namespace Grid2d;
 
@@ -80,7 +80,7 @@ public class GameGrid2D {
      */
     private vector<Coord2D> getDistinctRandomPoints(int amount) {
         
-        Set<Coord2D> pointsSet = new HashSet<Coord2D>(amount);
+        unordered_set<Coord2D, TileHasher, TileComparator> pointsSet;
         
         // Use the same Random object to ensure correct output
         
@@ -94,7 +94,7 @@ public class GameGrid2D {
             // These two will populate pointsSet later,
             // so check for duplicates now
             if (!randCoord.equals(p1UpRight) && !randCoord.equals(p2LowLeft))
-                pointsSet.add(randCoord);
+                pointsSet.insert(randCoord);
         }
         
         // As far as this function is concerned,
