@@ -9,9 +9,9 @@
 #include "Grid2D.hpp"
 
 using namespace std;
-using namespace GameGrid2d;
+using namespace Grid2d;
 
-public class GameGrid2D : public Grid2D {
+public class GameGrid2D {
 
     private const int BASE_WIDTH = 8;
     private Coord2D p1UpRight;
@@ -20,8 +20,8 @@ public class GameGrid2D : public Grid2D {
 
     private void drawBases() {
         
-        int gridX = super.getGridDimensions().getX();
-        int gridY = super.getGridDimensions().getY();
+        int gridX = getGridDimensions().getX();
+        int gridY = getGridDimensions().getY();
         
         Coord2D p1LowLeft = new Coord2D(0, 0);
         this.p1UpRight    = new Coord2D(p1LowLeft.getX() + BASE_WIDTH,
@@ -43,8 +43,7 @@ public class GameGrid2D : public Grid2D {
         landmarks.insert(0, p1UpRight);
         landmarks.insert(landmarks.size(), p2LowLeft);
         
-        assert landmarks.size() >= 2 : " landmarks: " + landmarks.toString();
-                
+        assert(landmarks.size() >= 2);               
         // Draw preliminary thin paths with no layers
         vector<Path> fullPath = getFullPath(landmarks, 0);
         for (Path p : fullPath) {
@@ -76,6 +75,7 @@ public class GameGrid2D : public Grid2D {
      * and will also not contain the values p1UpRight or p2LowLeft.
      * Additionally, none of these points shall fall within the bases.
      * @param amount Number of random points to generate
+:set mouse=a
      * @return List of distinct Coord2D objects
      */
     private vector<Coord2D> getDistinctRandomPoints(int amount) {
@@ -83,14 +83,13 @@ public class GameGrid2D : public Grid2D {
         Set<Coord2D> pointsSet = new HashSet<Coord2D>(amount);
         
         // Use the same Random object to ensure correct output
-        Random r = new Random(System.currentTimeMillis());
         
         // We use a while loop instead of a for loop
         // because there's a small chance
         // that we could accidentally generate duplicate Coord2D's
         while (pointsSet.size() < amount) {
             
-            Coord2D randCoord = getRandomNonBase(r);
+            Coord2D randCoord = getRandomNonBase();
             
             // These two will populate pointsSet later,
             // so check for duplicates now
@@ -100,14 +99,14 @@ public class GameGrid2D : public Grid2D {
         
         // As far as this function is concerned,
         // order does not matter
-        List<Coord2D> pointsList = new ArrayList<Coord2D>(pointsSet);
+        vector<Coord2D> pointsList = new vector<Coord2D>(pointsSet);
         
         return pointsList;
     }
     
-    private List<Path> getFullPath(List<Coord2D> landmarks, int thickness) {
+    private vector<Path> getFullPath(vector<Coord2D> landmarks, int thickness) {
         
-        List<Path> paths = new ArrayList<Path>(landmarks.size());
+        vector<Path> paths = new vector<Path>(landmarks.size());
         
         for (int i = 0; i < landmarks.size() - 1; i++) {
             
@@ -121,46 +120,49 @@ public class GameGrid2D : public Grid2D {
         return paths;
     }
     
-    private Coord2D getRandomNonBase(Random r) {
+    private Coord2D getRandomNonBase() {
         
-        int xGridBound = super.getGridDimensions().getX();
-        int yGridBound = super.getGridDimensions().getY();
-        
+        int xGridBound = getGridDimensions().getX();
+        int yGridBound = getGridDimensions().getY();
+        srand(time(null));
+
         int x, y;
         
-        x = r.nextInt(xGridBound);
+        x = rand() % xGridBounds;
         
         // if x is within range of base1, y needs to dodge base1
         if (x <= p1UpRight.getX()) {
             
-            y = r.nextInt(yGridBound - p1UpRight.getY());
+            y = rand() % (yGridBound - p1UpRight.getY());
             y += p1UpRight.getY();
         }
         
         // else if x is within range of base2, y needs to dodge base2
         else if (p2LowLeft.getX() <= x) {
             
-            y = r.nextInt(p2LowLeft.getY()); // exclusive
+            y = rand() % (p2LowLeft.getY()); // exclusive
         }
         
         // Else, y doesn't need to dodge anything
         else {
-            
-            y = r.nextInt(yGridBound);
+            y = rand()%(yGridBound);
         }
         
         return new Coord2D(x, y);
     }
     
-    public GameGrid2D(Coord2D dimensions, int thickness, int landmarks) {
-        super(dimensions);
+    public GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D(dimensions) {
         init(thickness, landmarks);
     }
 
-    public GameGrid2D(Grid2D other) {
-        super(other);
+    public GameGrid2D(Grid2D other) : Grid2D(other) {
         init(3, 6);
     }
-    
+
+    public ~GameGrid2d(){
+        //This is a deconstructor
+        
+    }
+}    
 #endif    
-}
+
