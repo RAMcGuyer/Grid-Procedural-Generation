@@ -1,6 +1,7 @@
 #include <cassert>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
@@ -8,14 +9,14 @@
 class Grid2D {
 	public:
 		Grid2D(Coord2D dimensions);
-		Grid2D(Grid2D other);
+		Grid2D(const Grid2D& other);
 		~Grid2D();
 
 		std::string toString();
-		void setTile(Tile.TileType t, Coord2D location);
-		Tile getTile(Coord2D location);
-		void assertBounds(Coord2D location);
-		bool checkBounds(Coord2D location);
+		void setTile(Tile::TileType t, Coord2D location);
+		Tile* getTile(Coord2D location) const;
+		void assertBounds(Coord2D location) const;
+		bool checkBounds(Coord2D location) const;
 		Coord2D getGridDimensions();
 		int size();
 		char getChar(Coord2D location);
@@ -23,14 +24,14 @@ class Grid2D {
 		bool canGoDown(Coord2D location);
 		bool canGoLeft(Coord2D location);
 		bool canGoRight(Coord2D location);
-		Tile getUp(Coord2D fromHere);
-		Tile getDown(Coord2D fromHere);
-		Tile getLeft(Coord2D fromHere);
-		Tile getRight(Coord2D fromHere);
+		Tile* getUp(Coord2D fromHere);
+		Tile* getDown(Coord2D fromHere);
+		Tile* getLeft(Coord2D fromHere);
+		Tile* getRight(Coord2D fromHere);
 		void markLine(Coord2D point1, Coord2D point2, bool mark);
-		void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, bool prioritize);
-		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType type, bool prioritize);
-		void setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int layers, bool prioritize);
+		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, bool prioritize);
+		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize);
+		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize);
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
 		std::unordered_set<Tile> getTraversableNeighbors(Coord2D location);
 
@@ -38,10 +39,11 @@ class Grid2D {
 		// end();
 		// next();
 	private:	
-		private const int ROWS;
-		private const int COLS;
-		protected Tile[][] grid;
-}
+		int ROWS;
+		int COLS;
+	protected: 
+		vector<vector<Tile> >* grid;
+};
 
 Grid2D::Grid2D(Coord2D dimensions) {
 	assert(dimensions.getX() >= 1);
@@ -50,47 +52,44 @@ Grid2D::Grid2D(Coord2D dimensions) {
 	ROWS = dimensions.getY();
 	COLS = dimensions.getX();
 
-	grid = new Tile[ROWS][COLS];
-
+	// initialize grid to 2D vector with ROWS rows and COLS columns, initialize rows to 0s
+	grid = new vector<vector<Tile> > (ROWS, vector<Tile>(COLS,Tile()));
 	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 		for (int thisCol = 0; thisCol < COLS; thisCol++) {
-				setTile(Tile.TileType.EMPTY, new Coord2D(thisCol, thisRow));
+				setTile(Tile::TileType::EMPTY, Coord2D(thisCol, thisRow));
 		}
 	}
 }
 
-Grid2D::Grid2D(Grid2D other) {
+Grid2D::Grid2D(const Grid2D& other) {
 	ROWS = other.ROWS;
 	COLS = other.COLS;
 
-	grid = new Tile[ROWS][COLS];
+	grid = new vector<vector<Tile> > (ROWS, vector<Tile>(COLS,Tile()));
 
 	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 		for(int thisCol = 0; thisCol < COLS; thisCol++) {
-			Coord2D thisCoord2D = new Coord2D(thisCol, thisRow);
-			Tile this_otherTile = other.getTile(thisCoord2D);
-			setTile(this_otherTile.getType(), thisCoord2D);
+			Coord2D thisCoord2D = Coord2D(thisCol, thisRow);
+			Tile* this_otherTile = other.getTile(thisCoord2D);
+			setTile(this_otherTile->getType(), thisCoord2D);
 		}
 	}
 }
 
 Grid2D::~Grid2D() {
-    for(int i = 0; i < ROWS; ++i)
-        delete[] grid[i];   
-
-    delete[] grid;
+    delete grid;
 }
 
 std::string Grid2D::toString() {
 	std::string sb;
-	sb.capacity((ROWS + 2) * (COLS + 3) + 1);
+	sb.resize((ROWS + 2) * (COLS + 3) + 1);
 
 	// Top row border
-	sb.append('*');
+	sb.append("*");
 	for (int i = 0; i < COLS; i++)
-		sb.append('-');
-	sb.append('*');
-	sb.append('\n');
+		sb.append("-");
+	sb.append("*");
+	sb.append("\n");
 
 	//Actual grid
 	for (int thisRow = ROWS - 1; thisRow >= 0; thisRow--) {
@@ -98,44 +97,44 @@ std::string Grid2D::toString() {
 			
 			// Left border
 			if (thisCol == 0)
-				sb.append('|');
+				sb.append("|");
 
-			Tile thisTile = grid[thisRow][thisCol];
-			sb.append(thisTile.getChar());
-
+			Tile thisTile = (*grid)[thisRow][thisCol];
+			sb.append(""+thisTile.getChar());
+	
 			// Right border
 			if (thisCol == COLS - 1)
-				sb.append('|');
+				sb.append("|");
 		}
 	}
 
 	// Bottom row border
-	sb.append('*');
+	sb.append("*");
 	for (int i = 0; i < COLS; i++)
-		sb.append('-');
-	sb.append('*');
-	sb.append('\n');
+		sb.append("-");
+	sb.append("*");
+	sb.append("\n");
 
 	return sb;
 }
 
-void Grid2D::setTile(Tile.TileType t, Coord2D location) {
+void Grid2D::setTile(Tile::TileType t, Coord2D location) {
 	assertBounds(location);
 
-	grid[location.getY()][location.getX()] = new Tile(t, new Coord2D(location));
+	(*grid)[location.getY()][location.getX()] = Tile(t, Coord2D(location));
 }
 
-Tile Grid2D::getTile(Coord2D location) {
+Tile* Grid2D::getTile(Coord2D location) const {
 	assertBounds(location);
 
-	return grid[location.getY()][location.getX()];
+	return &((*grid)[location.getY()][location.getX()]);
 }
 
-void Grid2D::assertBounds(Coord2D location) {
+void Grid2D::assertBounds(Coord2D location) const {
 	assert(checkBounds(location));
 }
 
-bool Grid2D::checkBounds(Coord2D location) {
+bool Grid2D::checkBounds(Coord2D location) const{
 	int x = location.getX();
 	int y = location.getY();
 
@@ -146,7 +145,7 @@ bool Grid2D::checkBounds(Coord2D location) {
 }
 
 Coord2D Grid2D::getGridDimensions() {
-	return new Coord2D(COLS, ROWS);
+	return  Coord2D(COLS, ROWS);
 }
 
 int Grid2D::size() {
@@ -154,7 +153,7 @@ int Grid2D::size() {
 }
 
 char Grid2D::getChar(Coord2D location) {
-	return getTile(location).getChar();
+	return getTile(location)->getChar();
 }
 
 bool Grid2D::canGoUp(Coord2D location) {
@@ -173,28 +172,28 @@ bool Grid2D::canGoRight(Coord2D location) {
 	return location.getX() < COLS - 1;
 }
 
-Tile Grid2D::getUp(Coord2D fromHere) {
-	if (!canGoUp(fromHere)) return null;
+Tile* Grid2D::getUp(Coord2D fromHere) {
+	if (!canGoUp(fromHere)) return NULL;
 
-	return getTile(new Coord2D(fromHere.getX(), fromHere.getY() + 1));
+	return getTile( Coord2D(fromHere.getX(), fromHere.getY() + 1));
 }
 
-Tile Grid2D::getDown(Coord2D fromHere) {
-	if (!canGoDown(fromHere)) return null;
+Tile* Grid2D::getDown(Coord2D fromHere) {
+	if (!canGoDown(fromHere)) return NULL;
 
-	return getTile(new Coord2D(fromHere.getX(), fromHere.getY() - 1));
+	return getTile( Coord2D(fromHere.getX(), fromHere.getY() - 1));
 }
 
-Tile Grid2D::getLeft(Coord2D fromHere) {
-	if (!canGoLeft(fromHere)) return null;
+Tile* Grid2D::getLeft(Coord2D fromHere) {
+	if (!canGoLeft(fromHere)) return NULL;
 
-	return getTile(new Coord2D(fromHere.getX() - 1, fromHere.getY()));
+	return getTile( Coord2D(fromHere.getX() - 1, fromHere.getY()));
 }
 
-Tile Grid2D::getRight(Coord2D fromHere) {
-	if (!canGoRight(fromHere)) return null;
+Tile* Grid2D::getRight(Coord2D fromHere) {
+	if (!canGoRight(fromHere)) return NULL;
 
-	return getTile(new Coord2D(fromHere.getX() + 1, fromHere.getY()));
+	return getTile( Coord2D(fromHere.getX() + 1, fromHere.getY()));
 }
 
 /**
@@ -210,38 +209,38 @@ void Grid2D::markLine(Coord2D point1, Coord2D point2, bool mark) {
 	assert(point1.getX() == point2.getX() || point1.getY() == point2.getY());
 
 	if (point1.equals(point2)) {
-		Tile t = getTile(point1);
-		t.setMark(mark);
+		Tile* t = getTile(point1);
+		t->setMark(mark);
 		return;
 	}
 
 	// If on the same row
 	if (point1.getY() == point2.getY()) {
 		for (int i = 0; i < COLS; i++) {
-			Tile thisTile = getTile(new Coord2D(i, point1.getY()));
-			thisTile.setMark(mark);
+			Tile* thisTile = getTile(Coord2D(i, point1.getY()));
+			thisTile->setMark(mark);
 		}
 	}
 
 	// Else, they're on the same column
 	else {
 		for (int i = 0; i < ROWS; i++) {
-			Tile thisTile = getTile(new Coord2D(point1.getX(), i));
-			thisTile.setMark(mark);
+			Tile* thisTile = getTile(Coord2D(point1.getX(), i));
+			thisTile->setMark(mark);
 		}
 	}
 }
 
-void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, bool prioritize) {
+void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, bool prioritize) {
 	assertBounds(point1);
 	assertBounds(point2);
 
 	assert(point1.getX() == point2.getX() || point1.getY() == point2.getY());
 
 	if (point1.equals(point2)) {
-		Tile t = getTile(point1);
-		if (prioritize || t.getType() == Tile.TileType.EMPTY)
-			t.setType(type);
+		Tile* t = getTile(point1);
+		if (prioritize || t->getType() == Tile::TileType::EMPTY)
+			t->setType(type);
 		return;
 	}
 
@@ -254,10 +253,10 @@ void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, boo
 		i <= (point1.getX() >  point2.getX() ? point1.getX() : point2.getX());
 		i++) {
 
-			Tile thisTile = getTile(new Coord2D(i, point1.getY()));
+			Tile* thisTile = getTile(Coord2D(i, point1.getY()));
 
-			if (prioritize || thisTile.getType() == Tile.TileType.EMPTY)
-				thisTile.setType(type);
+			if (prioritize || thisTile->getType() == Tile::TileType::EMPTY)
+				thisTile->setType(type);
 		}
 	}
 
@@ -270,15 +269,15 @@ void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, boo
 		i <= (point1.getY() >  point2.getY() ? point1.getY() : point2.getY());
 		i++) {
 
-		Tile thisTile = getTile(new Coord2D(point1.getX(), i));
+		Tile* thisTile = getTile(Coord2D(point1.getX(), i));
 
-		if (prioritize || thisTile.getType() == Tile.TileType.EMPTY)
-			thisTile.setType(type);
+		if (prioritize || thisTile->getType() == Tile::TileType::EMPTY)
+			thisTile->setType(type);
 		}
 	}
 }
 
-void Grid2D::setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType type, bool prioritize) {
+void Grid2D::setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize) {
 	assertBounds(lowerLeft);
 	assertBounds(upperRight);
 
@@ -296,64 +295,49 @@ void Grid2D::setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile.TileType ty
 
 		// Mark row by row
 
-		Coord2D thisRowLeft = new Coord2D(lowerLeft.getX(), thisY);
-		Coord2D thisRowRight = new Coord2D(upperRight.getX(), thisY);
+		Coord2D thisRowLeft = Coord2D(lowerLeft.getX(), thisY);
+		Coord2D thisRowRight = Coord2D(upperRight.getX(), thisY);
 
 		setTypeLine(thisRowLeft, thisRowRight, type, prioritize);
-
-		delete thisRowLeft;
-		delete thisRowRight;
 	}
 }
 
-void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile.TileType type, int layers, bool prioritize) {
+void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize) {
 	for (int thisLevel = 0; thisLevel <= layers; thisLevel++) {
 
 		// Row (horizontal)
 		if (point1.getY() == point2.getY()) {
 			// Do row on top, offset by thisLevel
-			Coord2D point1Layered = new Coord2D(point1.getX(), point1.getY() + thisLevel);
-			Coord2D point2Layered = new Coord2D(point2.getX(), point2.getY() + thisLevel);
+			Coord2D point1Layered = Coord2D(point1.getX(), point1.getY() + thisLevel);
+			Coord2D point2Layered = Coord2D(point2.getX(), point2.getY() + thisLevel);
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
-
-			delete point1Layered;
-			delete point2Layered;
 
 			// Do row on bot, offset by thisLevel
-			point1Layered = new Coord2D(point1.getX(), point1.getY() - thisLevel);
-			point2Layered = new Coord2D(point2.getX(), point2.getY() - thisLevel);
+			point1Layered =  Coord2D(point1.getX(), point1.getY() - thisLevel);
+			point2Layered =  Coord2D(point2.getX(), point2.getY() - thisLevel);
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
-
-			delete point1Layered;
-			delete point2Layered;
 		}
 
 		// Col (vertical)
 		else if (point1.getX() == point2.getX()) {
  
 			// Do col on left, offset by thisLevel
-			Coord2D point1Layered = new Coord2D(point1.getX() - thisLevel, point1.getY());
-			Coord2D point2Layered = new Coord2D(point2.getX() - thisLevel, point2.getY());
+			Coord2D point1Layered =  Coord2D(point1.getX() - thisLevel, point1.getY());
+			Coord2D point2Layered =  Coord2D(point2.getX() - thisLevel, point2.getY());
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
-
-			delete point1Layered;
-			delete point2Layered;
 
 			// Do col on right, offset by thisLevel
-			point1Layered = new Coord2D(point1.getX() + thisLevel, point1.getY());
-			point2Layered = new Coord2D(point1.getX() + thisLevel, point2.getY());
+			point1Layered =  Coord2D(point1.getX() + thisLevel, point1.getY());
+			point2Layered =  Coord2D(point1.getX() + thisLevel, point2.getY());
 
 			if (checkBounds(point1Layered) && checkBounds(point2Layered))
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
-
-			delete point1Layered;
-			delete point2Layered;
 		}
 
 		else
@@ -378,13 +362,10 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	for (int thisY = lowerLeft.getY(); thisY <= upperRight.getY(); thisY++) {
 
 		// Mark row by row
-		Coord2D thisRowLeft = new Coord2D(lowerLeft.getX(), thisY);
-		Coord2D thisRowRight = new Coord2D(upperRight.getX(), thisY);
+		Coord2D thisRowLeft =  Coord2D(lowerLeft.getX(), thisY);
+		Coord2D thisRowRight =  Coord2D(upperRight.getX(), thisY);
 
 		markLine(thisRowLeft, thisRowRight, mark);
-
-		delete thisRowLeft;
-		delete thisRowRight;
 	}
 }
 
@@ -392,31 +373,31 @@ std::unordered_set<Tile> Grid2D::getTraversableNeighbors(Coord2D location) {
 	std::unordered_set<Tile> neighbors;
 
 	if (canGoUp(location)) {
-		Tile upNeighbor = getUp(location);
+		Tile* upNeighbor = getUp(location);
 
-		if (upNeighbor.getType() != Tile.TileType.NON_TRAVERSABLE)
-			neighbors.insert(upNeighbor);
+		if (upNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
+			neighbors.insert(*upNeighbor);
 	}
 
 	if (canGoDown(location)) {
-		Tile downNeighbor = getDown(location);
+		Tile* downNeighbor = getDown(location);
 
-		if (downNeighbor.getType() != Tile.TileType.NON_TRAVERSABLE)
-			neighbors.insert(downNeighbor);
+		if (downNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
+			neighbors.insert(*downNeighbor);
 	}
 
 	if (canGoLeft(location)) {
-		Tile leftNeighbor = getLeft(location);
+		Tile* leftNeighbor = getLeft(location);
 
-		if (leftNeighbor.getType() != Tile.TileType.NON_TRAVERSABLE)
-			neighbors.insert(leftNeighbor);
+		if (leftNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
+			neighbors.insert(*leftNeighbor);
 	}
 
 	if (canGoRight(location)) {
-		Tile rightNeighbor = getRight(location);
+		Tile* rightNeighbor = getRight(location);
 
-		if (rightNeighbor.getType() != Tile.TileType.NON_TRAVERSABLE)
-			neighbors.insert(rightNeighbor);
+		if (rightNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
+			neighbors.insert(*rightNeighbor);
 	}
 
 	return neighbors;

@@ -159,8 +159,7 @@ class Path public {
                 uTile = uTile.getPreviousTile();
 
                 if (uTile == NULL && joints.size() < 2) {
-                    cout << "Not enough prev's? FOr sure not enough joints\n
-                    Perhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
+                    cout << "Not enough prev's? FOr sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
                     "dest: " << dest.toString() << "\n" <<
                     "src.equals(dest)? " << src.equals(dest);
 
