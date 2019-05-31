@@ -31,7 +31,7 @@ struct Coord2DHasher {
 };
 
 struct Coord2DComparator {
-	bool operator()(const Coord2D& obj1, const Coord2D& obj2) {
+	bool operator()(const Coord2D& obj1, const Coord2D& obj2) const {
 		if(
 			obj1.getX() == obj2.getX()
 			&& obj1.getY() == obj2.getY()

@@ -1,6 +1,6 @@
+
 #ifndef __COORD2D_H__
 #define __COORD2D_H__
-
 #include <stdlib.h> 
 #include <string>
 #include <typeinfo>
@@ -24,11 +24,11 @@ class Coord2D {
             this->y = other.y;
         }
         //Getters    
-        int getX() {
+        int getX() const {
             return x;
         }
         
-        int getY() {
+        int getY() const {
             return y;
         }
 
@@ -51,9 +51,8 @@ class Coord2D {
         }
 
         //For use in the hashset
-        int hashCode() {
+        int hashCode() const {
             return x + y;
         }
 };
-
-#endif  //__COORD2D_H__
+#endif
