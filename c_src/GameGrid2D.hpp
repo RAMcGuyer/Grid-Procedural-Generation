@@ -7,7 +7,7 @@
 #include <vector>
 #include "Coord2D.hpp"
 #include "Grid2D.hpp"
-#include "TileHash.hpp"
+#include "Hash.hpp"
 using namespace std;
 using namespace Grid2d;
 
