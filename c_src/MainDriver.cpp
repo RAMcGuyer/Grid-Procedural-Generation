@@ -9,6 +9,7 @@
 #include "Tile.hpp"
 #include "Path.hpp"
 #include "Grid2D.hpp"
+#include "Hash.hpp"
 
 using namespace std;
 
@@ -23,12 +24,11 @@ void testSetOfPoints();
 
 int main(int argc, char* argv) {
     cout << "Hello World!" << endl;
-    if(arc > 1) {
+    if(arc > 2) {
         cout << "Too many arguments!" << endl;
         exit(1);
     }
-
-    if(argc <= 1) {
+    else if(argc == 1) {
         testGenerateGameGrid(INT_MAX);
     }
     else {
@@ -65,38 +65,35 @@ void testDijkstra() {
     Coord2D obstacle_LowerLeft = Coord2D(5,2);
     Coord2D obstacle_UpperRight = Coord2D(7,5);
 
-    grid.setTypeRect(obstacle_LowerLeft, obstacle_UpperRight, TileType::NON_TRAVERSABLE, true);
+    grid.setTypeRect(obstacle_LowerLeft, obstacle_UpperRight, Tile::TileType::NON_TRAVERSABLE, true);
     cout << "Grid with single obstacle:\n\n" << grid.toString() << endl;
 
     Coord2D pointA = Coord2D(1,1);
     Coord2D pointB = Coord2D(9,8);
-    grid.getTile(pointA).setType(TileType::TRAVERSABLE);
-    grid.getTile(pointB).setType(TileType::TRAVERSABLE);
+    grid.getTile(pointA).setType(Tile::TileType::TRAVERSABLE);
+    grid.getTile(pointB).setType(Tile::TileType::TRAVERSABLE);
 
     cout << "Grid with pointA = " << pointA.toString() << endl;
     cout << "          pointB = " << pointB.toString() << endl;
     cout << grid.toString() << endl;
 
     Path path = Path(grid, pointA, pointB, 1);
-    path.setPathType(TileType::TRAVERSABLE, false);
+    path.setPathType(Tile::TileType::TRAVERSABLE, false);
 
     cout << "Grid with best route:\n" << grid.toString() << endl;
 }
 
 void testIterator() {
-    Coord2D gridDimensions = new Coord2D(50,50);
-    Grid2D grid = new Grid2D(gridDimensions);
+    Coord2D gridDimensions = Coord2D(50,50);
+    Grid2D grid = Grid2D(gridDimensions);
 
     unordered_set<Tile> tiles;
-    tiles.insert(grid.getTile(new Coord2D(0,0)));
+    tiles.insert(grid.getTile(Coord2D(0,0)));
     for (Tile t : grid) {
         tiles.insert(t);
     }
     cout << "Expected size: " << gridDimensions.getX()*gridDimensions.getY() << endl;
     cout << "Num of tiles: " << tiles.size() << endl;
-
-    delete gridDimensions;
-    delete grid;
 }
 
 void testPaths() {
@@ -104,15 +101,15 @@ void testPaths() {
     cout << "Empty grid: \n\n" << grid.toString() << endl;
 
     Path path = Path(grid);
-    assert(path.addJoint(Coord2D(10,1));
+    assert(path.addJoint(Coord2D(10,1)));
     assert(path.addJoint(Coord2D(10, 2)));
-    assert(path.addJoint(Coord2D(30, 2));
+    assert(path.addJoint(Coord2D(30, 2)));
     assert(path.addJoint(Coord2D(30, 0)));
 
-    path.setPathType(TileType::TRAVERSABLE, true);
+    path.setPathType(Tile::TileType::TRAVERSABLE, true);
 
     Grid2D copy = Grid2D(grid);
-    copy.setTile(TileType::TRAVERSABLE, Coord2D(0,0));
+    copy.setTile(Tile::TileType::TRAVERSABLE, Coord2D(0,0));
 
     cout << "Populated grid:\n\n" << grid.toString() << endl;
     cout << "Copy:\n\n" << copy.toString() << endl;
@@ -143,14 +140,14 @@ void testMarkRow() {
     Coord2D lowbar_right = Coord2D(gridDimensions.getX()-1, lowbar_left.getY());
 
     cout << "Marking lower bar..." <<endl;
-    grid.setTypeLine(lowbar_left, lowbar_right, TileType::TRAVERSAGBLE, 0,true);
+    grid.setTypeLine(lowbar_left, lowbar_right, Tile::TileType::TRAVERSAGBLE, 0,true);
     cout << grid.toString() <<endl;
 
     Coord2D vertbar_down = Coord2D(2,0);
     Coord2D vertbar_up = Coord2D(verbar_down.getX(), gridDimensions.getY()-1);
 
     cout << "Marking vert bar..." << endl;
-    grid.setTypeLine(vertbar_down, vertbar_up, TileType::TRAVERSABLE,2,true);
+    grid.setTypeLine(vertbar_down, vertbar_up, Tile::TileType::TRAVERSABLE,2,true);
     cout << grid.toString() <<endl;
 }
 
@@ -161,7 +158,7 @@ void testGrid() {
     Coord2D failPoint = Coord2D(7,14);
 
     Grid2D grid = Grid2D(gridDimensions);
-    grid.setTile(TileType::TRAVERSABLE, testPoint);
+    grid.setTile(Tile::TileType::TRAVERSABLE, testPoint);
 
     cout << grid.toString() << endl;
     cout << "Tile at " << testPoint.toString() << ": " << grid.getTile(testPoint) << endl;
