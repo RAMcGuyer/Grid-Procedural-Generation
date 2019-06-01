@@ -52,22 +52,42 @@ class Path {
         }
 
         bool addJoint(Coord2D newJoint, int index) {
-            auto tempIt = joints->begin();
-            advance(tempIt,index);
-            joints->insert(tempIt, newJoint);
-            list<Coord2D>::iterator it = joints->begin();
-            index >=0 ? return false : ;
-            advance(it, index); 
+            // range check index
+            // passing this check means index is: 0 <= index <= joints->size()
+            if(index < 0 || (unsigned)index > joints->size()) {
+                return false;
+            }
+
+            // add newJoint at joints[index]
+            auto it = joints->begin();
+            advance(it,index); // it can be joints->begin() <= it <= joints->end()
+            joints->insert(it, newJoint); // FIXME: do we need to reset "it" to joints[index]?
+
+            // make sure joints[index] is compatible with neighbors prev/next (if they exist)
             auto prevIt = prev(it);
-            if(prevIt >= joints->begin()) { // it has valid previous iterator
+
+            // check that joint[index] has previous
+            // smallest position "it" can be is joints->begin()
+            if(it != joints->begin()) { 
+                // if we made it here, we know joints[index] is not joints->begin(),
+                // so it has a previous neighbor -> now we check compatibility
                 Coord2D left_neighbor = *(prevIt);
                 if(!areCompatibleJoints(left_neighbor, newJoint)) {
                     it = joints->erase(it);
                     return false;
                 }
             }
+            //reset "it" to joints[index]
+            it=joints->begin();
+            advance(it,index);
+
+            // check that joint[index] has next
+            // largest position "it" can be is joints->end()
+            // "it" has next neighbor if: it != joints->end() and next(it) != joints->end()
             auto nextIt = next(it);
-            if(nextIt < joints->end()) {// nextIt is valid
+            if(it != joints->end() && nextIt != joints->end()) {
+                // if we made it here, we know joints[index] has next neighbor 
+                // so we can check compatibility
                 Coord2D right_neighbor = *(nextIt);
                 if(!areCompatibleJoints(newJoint, right_neighbor)) {
                     it = joints->erase(it);
@@ -83,44 +103,44 @@ class Path {
                 exit(1);
             }
             Coord2D firstJoint = joints->front();
-            list<Coord2D> it = joints->begin();
+            list<Coord2D>::iterator it = joints->begin();
             for(;it != joints->end();++it) {
                 Coord2D secondJoint = *it;
-                grid.setTypeLine(firsJoint, secondJoint, type, thickness, prioritize);
+                grid->setTypeLine(firstJoint, secondJoint, type, thickness, prioritize);
                 firstJoint = secondJoint; // FIXME: possible error - does this do the same thing as in java?
             }
         }
 
         void populateBestPath(Coord2D src, Coord2D dest) {
-            Grid2D* tempGrid = new Grid2D(this->grid);
-            Tile srcTile = tempGrid.getTile(src);
-            Tile destTile = tempGrid.getTile(dest);
-            srcTile.setDistance(0);
+            Grid2D tempGrid = Grid2D(*(this->grid));
+            Tile* srcTile = tempGrid.getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
+            Tile* destTile = tempGrid.getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
+            srcTile->setDistance(0);
 
             if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
-            if(srcTile.getType() == NON_TRAVERSABLE) {
+            if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
                 cout << "Path attempted on non-traversable srcTile" << endl;
                 exit(1);
             }
-            if(destTile.getType() == NON_TRAVERSABLE) {
+            if(destTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
                 cout << "Path attempted on non-traversable destTile" << endl;
                 exit(1);
             }
 
-            unordered_set<Tile> setQ = new unordered_set<Tile>();
-            setQ.insert(grid.getTile(new Coord2D(0,0)));
+            unordered_set<Tile, TileHasher, TileComparator> setQ;
+            setQ.insert(*grid->getTile(Coord2D(0,0)));
 
             for (Tile t: tempGrid) {
-                if(t.getType() != NON_TRAVERSABLE) {
+                if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
                     setQ.insert(t);
                 }
             }
 
-            if(setQ.find(srcTile) == setQ.end()) {
+            if(setQ.find(*srcTile) == setQ.end()) {
                 cout << "setQ doesn't contain srcTile" << endl;
                 exit(1);
             }
-            if(setQ.find(destTile) == setQ.end()) {
+            if(setQ.find(*destTile) == setQ.end()) {
                 cout << "setQ doesn't contain destTile" << endl;
             }
 
@@ -132,7 +152,7 @@ class Path {
                 for (Tile t : setQ) {
                     if(t.getDistance() < runningMin) {
                         runningMin = t.getDistance();
-                        uTile = t;
+                        uTile = &t;
                     }
                 }
 
@@ -140,19 +160,19 @@ class Path {
                     cout << "Minimum distance tile uTile not properly set" << endl;
                     exit(1);
                 }
-                if(setQ.find(uTile) == setQ.end()) {
-                    cout << "setQ doesn't contain uTile " << uTile.toString() << endl;
+                if(setQ.find(*uTile) == setQ.end()) {
+                    cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
                     exit(1);
                 }
 
-                if(uTile == destTile) {
+                if(uTile == destTile) { 
                     break;
                 }
 
-                unordered_set<Tile> uNeighbors = tempGrid.getTraversableNeighbors(uTile.getLocation());
+                unordered_set<Tile, TileHasher, TileComparator> uNeighbors = tempGrid.getTraversableNeighbors(*uTile->getLocation());
 
                 for (Tile thisNeighbor : uNeighbors) {
-                    int currentDist = uTile.getDistance() + 1;
+                    int currentDist = uTile->getDistance() + 1;
                     if (currentDist < thisNeighbor.getDistance()) {
                         thisNeighbor.setDistance(currentDist);
                         thisNeighbor.setPreviousTile(uTile);
@@ -160,17 +180,17 @@ class Path {
                 }
             }
 
-            if (uTile.getPreviousTile() == NULL || uTile == srcTile) {
+            if (uTile->getPreviousTile() == NULL || uTile == srcTile) {
                 cout << "Condition specified by Dijkstra's not met" << endl;
                 exit(1);
             }
 
             while(uTile != NULL) {
-                joints->push_back(uTile.getLocation());
-                uTile = uTile.getPreviousTile();
+                joints->push_back(*uTile->getLocation());
+                uTile = uTile->getPreviousTile();
 
                 if (uTile == NULL && joints->size() < 2) {
-                    cout << "Not enough prev's? FOr sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
+                    cout << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
                     "dest: " << dest.toString() << "\n" <<
                     "src.equals(dest)? " << src.equals(dest);
 
