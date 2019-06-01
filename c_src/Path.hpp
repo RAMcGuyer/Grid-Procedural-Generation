@@ -16,13 +16,13 @@ using namespace std;
 class Path {
     private:
         Grid2D grid;
-        list<Coord2D> joints;
+        list<Coord2D*> joints;
         int thickness;
 
     public:
         Path(Grid2D grid) {
             this->grid=grid;
-            joints=new list<Coord2D>();
+            this->joints=new list<Coord2D>();
             this->thickness=0;
         }
         Path(Grid2D grid, Coord2D point1, Coord2D point2, int thickness) {
@@ -42,7 +42,7 @@ class Path {
         }
 
         bool addJoint(Coord2D newJoint) {
-            if (joints.isEmpty()) {
+            if (joints.empty()) {
                 joints.push_back(newJoint);
                 return true;
             }
@@ -74,7 +74,7 @@ class Path {
             return true;
         }
 
-        void setPathType(TileType type, bool prioritize) {
+        void setPathType(Tile::TileType type, bool prioritize) {
             if(!joints.size() >= 2) {
                 cout << "Not enough joints in path" <<endl;
                 exit(1);
@@ -89,7 +89,7 @@ class Path {
         }
 
         void populateBestPath(Coord2D src, Coord2D dest) {
-            Grid2D tempGrid = new Grid2D(this->grid);
+            Grid2D* tempGrid = new Grid2D(this->grid);
             Tile srcTile = tempGrid.getTile(src);
             Tile destTile = tempGrid.getTile(dest);
             srcTile.setDistance(0);
@@ -106,6 +106,7 @@ class Path {
 
             unordered_set<Tile> setQ = new unordered_set<Tile>();
             setQ.insert(grid.getTile(new Coord2D(0,0)));
+
             for (Tile t: tempGrid) {
                 if(t.getType() != NON_TRAVERSABLE) {
                     setQ.insert(t);
@@ -120,10 +121,11 @@ class Path {
                 cout << "setQ doesn't contain destTile" << endl;
             }
 
-            Tile uTile = NULL;
+            Tile* uTile = NULL;
 
             while(!setQ.empty()) {
                 int runningMin = INT_MAX;
+
                 for (Tile t : setQ) {
                     if(t.getDistance() < runningMin) {
                         runningMin = t.getDistance();
