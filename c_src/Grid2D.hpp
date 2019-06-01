@@ -11,6 +11,7 @@ class Grid2D {
 	public:
 		Grid2D(Coord2D dimensions);
 		Grid2D(const Grid2D& other);
+		Grid2D(Grid2D* other);
 		~Grid2D();
 
 		std::string toString();
@@ -72,6 +73,20 @@ Grid2D::Grid2D(const Grid2D& other) {
 		for(int thisCol = 0; thisCol < COLS; thisCol++) {
 			Coord2D thisCoord2D = Coord2D(thisCol, thisRow);
 			Tile* this_otherTile = other.getTile(thisCoord2D);
+			setTile(this_otherTile->getType(), thisCoord2D);
+		}
+	}
+}
+
+Grid2D::Grid2D(Grid2D* other) {
+	ROWS = other->ROWS;
+	COLS = other->COLS;
+
+	grid = new vector<vector<Tile> >(ROWS, vector<Tile>(COLS,Tile()));
+	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
+		for(int thisCol = 0; thisCol < COLS; thisCol++) {
+			Coord2D thisCoord2D = Coord2D(thisCol, thisRow);
+			Tile* this_otherTile = other->getTile(thisCoord2D);
 			setTile(this_otherTile->getType(), thisCoord2D);
 		}
 	}
