@@ -21,6 +21,7 @@ class Coord2D {
         template <class T> bool equals(T other);
         int hashCode() const;
         void operator=(const Coord2D& rhs);
+        bool operator==(const Coord2D& rhs);
 };
 
 //Constructors, take in an X and a Y coordinate.
@@ -68,6 +69,10 @@ int Coord2D::hashCode() const {
 void Coord2D::operator=(const Coord2D& rhs) {
     this->x = rhs.x;
     this->y = rhs.y;
+}
+
+bool Coord2D::operator==(const Coord2D& rhs) {
+    return this->x == rhs.x && this->y == rhs.y;
 }
 
 #endif
