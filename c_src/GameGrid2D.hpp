@@ -1,14 +1,17 @@
-#ifndef __GAMEGRID2D_H__
-#define __GAMEGRID2D_H__
+#ifndef __GAMEGRID2D_HPP__
+#define __GAMEGRID2D_HPP__
+
 #include <bits/stdc++.h>
 #include <stdlib.h>
 #include <time.h>
 #include <set>
 #include <vector>
+
 #include "Path.hpp"
 #include "Coord2D.hpp"
 #include "Grid2D.hpp"
 #include "Hash.hpp"
+
 using namespace std;
 
 class GameGrid2D : public Grid2D {
@@ -172,5 +175,6 @@ private:
     }
     
 };    
-#endif    
+
+#endif //__GAMEGRID2D_HPP__
 

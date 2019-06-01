@@ -1,5 +1,5 @@
-#ifndef __PATH_H__
-#define __PATH_H__
+#ifndef __PATH_HPP__
+#define __PATH_HPP__
 
 #include <iostream>
 #include <list>
@@ -182,4 +182,4 @@ class Path {
 
 };
 
-#endif // __PATH_H__
+#endif // __PATH_HPP__

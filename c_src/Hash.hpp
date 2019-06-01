@@ -41,4 +41,6 @@ struct Coord2DComparator {
 		return false;
 	}
 };
-#endif
+
+#endif //__HASH_HPP__
+

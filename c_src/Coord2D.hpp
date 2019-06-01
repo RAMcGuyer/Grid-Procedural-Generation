@@ -1,6 +1,6 @@
+#ifndef __COORD2D_HPP__
+#define __COORD2D_HPP__
 
-#ifndef __COORD2D_H__
-#define __COORD2D_H__
 #include <stdlib.h> 
 #include <string>
 #include <typeinfo>
@@ -70,4 +70,5 @@ void Coord2D::operator=(const Coord2D& rhs) {
     this->y = rhs.y;
 }
 
-#endif
+#endif //__COORD2D_HPP__
+
