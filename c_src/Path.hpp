@@ -15,23 +15,23 @@ using namespace std;
 
 class Path {
     private:
-        Grid2D grid;
-        list<Coord2D*> joints;
+        Grid2D* grid;
+        list<Coord2D>* joints;
         int thickness;
 
     public:
-        Path(Grid2D grid) {
+        Path(Grid2D* grid) {
             this->grid=grid;
             this->joints=new list<Coord2D>();
             this->thickness=0;
         }
-        Path(Grid2D grid, Coord2D point1, Coord2D point2, int thickness) {
+        Path(Grid2D* grid, Coord2D point1, Coord2D point2, int thickness) {
             this->grid=grid;
             this->joints= new list<Coord2D>();
             this->thickness=thickness;
             populateBestPath(point1, point2);
         }
-        Path(Grid2D grid, list<Coord2D> joints, int thickness) { // FIXME: how are joints passed? make new in constructor?
+        Path(Grid2D* grid, list<Coord2D> & joints, int thickness) { // FIXME: how are joints passed? make new in constructor?
             this->grid=grid;
             this->joints = new list<Coord2D>(joints);
             this->thickness=thickness;
@@ -42,32 +42,35 @@ class Path {
         }
 
         bool addJoint(Coord2D newJoint) {
-            if (joints.empty()) {
-                joints.push_back(newJoint);
+            if (joints->empty()) {
+                joints->push_back(newJoint);
                 return true;
             }
             else {
-                return addJoint(newJoint, joints.size());
+                return addJoint(newJoint, joints->size());
             }
         }
 
         bool addJoint(Coord2D newJoint, int index) {
-            joints.insert(index, newjoin);
-            list<Coord2D>::iterator it = joints.begin();
+            auto tempIt = joints->begin();
+            advance(tempIt,index);
+            joints->insert(tempIt, newJoint);
+            list<Coord2D>::iterator it = joints->begin();
+            index >=0 ? return false : ;
             advance(it, index); 
             auto prevIt = prev(it);
-            if(prevIt >= joints.begin()) { // it has valid previous iterator
+            if(prevIt >= joints->begin()) { // it has valid previous iterator
                 Coord2D left_neighbor = *(prevIt);
                 if(!areCompatibleJoints(left_neighbor, newJoint)) {
-                    it = joints.erase(it);
+                    it = joints->erase(it);
                     return false;
                 }
             }
             auto nextIt = next(it);
-            if(nextIt < joints.end()) {// nextIt is valid
+            if(nextIt < joints->end()) {// nextIt is valid
                 Coord2D right_neighbor = *(nextIt);
                 if(!areCompatibleJoints(newJoint, right_neighbor)) {
-                    it = joints.erase(it);
+                    it = joints->erase(it);
                     return false;
                 }
             }
@@ -75,13 +78,13 @@ class Path {
         }
 
         void setPathType(Tile::TileType type, bool prioritize) {
-            if(!joints.size() >= 2) {
+            if(!joints->size() >= 2) {
                 cout << "Not enough joints in path" <<endl;
                 exit(1);
             }
-            Coord2D firstJoint = joints.front();
-            list<Coord2D> it = joints.begin();
-            for(;it != joints.end();++it) {
+            Coord2D firstJoint = joints->front();
+            list<Coord2D> it = joints->begin();
+            for(;it != joints->end();++it) {
                 Coord2D secondJoint = *it;
                 grid.setTypeLine(firsJoint, secondJoint, type, thickness, prioritize);
                 firstJoint = secondJoint; // FIXME: possible error - does this do the same thing as in java?
@@ -163,10 +166,10 @@ class Path {
             }
 
             while(uTile != NULL) {
-                joints.push_back(uTile.getLocation());
+                joints->push_back(uTile.getLocation());
                 uTile = uTile.getPreviousTile();
 
-                if (uTile == NULL && joints.size() < 2) {
+                if (uTile == NULL && joints->size() < 2) {
                     cout << "Not enough prev's? FOr sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
                     "dest: " << dest.toString() << "\n" <<
                     "src.equals(dest)? " << src.equals(dest);
