@@ -1,6 +1,6 @@
+#ifndef __COORD2D_HPP__
+#define __COORD2D_HPP__
 
-#ifndef __COORD2D_H__
-#define __COORD2D_H__
 #include <stdlib.h> 
 #include <string>
 #include <typeinfo>

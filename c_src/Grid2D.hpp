@@ -1,3 +1,6 @@
+#ifndef __GRID2D_HPP__
+#define __GRID2D_HPP__
+
 #include <cassert>
 #include <string>
 #include <unordered_set>
@@ -9,6 +12,7 @@
 
 class Grid2D {
 	public:
+		Grid2D();
 		Grid2D(Coord2D dimensions);
 		Grid2D(const Grid2D& other);
 		Grid2D(Grid2D* other);
@@ -46,6 +50,10 @@ class Grid2D {
 	protected: 
 		vector<vector<Tile> >* grid;
 };
+
+Grid2D::Grid2D() {
+	// empty default constructor
+}
 
 Grid2D::Grid2D(Coord2D dimensions) {
 	assert(dimensions.getX() >= 1);
@@ -418,3 +426,6 @@ std::unordered_set<Tile, TileHasher, TileComparator> Grid2D::getTraversableNeigh
 
 	return neighbors;
 }
+
+#endif //__GRID2D_HPP__
+

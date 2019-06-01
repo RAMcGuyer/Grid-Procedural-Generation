@@ -1,8 +1,10 @@
-#ifndef TILE_H
-#define TILE_H
+#ifndef __TILE_HPP__
+#define __TILE_HPP__
 
 #include <climits>
+
 #include "Coord2D.hpp"
+
 using namespace std;
 
 class Tile {
@@ -146,4 +148,4 @@ Coord2D* Tile::getLocation() const {
     return location;
 }
 
-#endif
+#endif //__TILE_HPP__
