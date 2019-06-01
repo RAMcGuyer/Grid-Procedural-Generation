@@ -5,66 +5,80 @@
 #include <time.h>
 #include <set>
 #include <vector>
+#include "Path.hpp"
 #include "Coord2D.hpp"
 #include "Grid2D.hpp"
 #include "Hash.hpp"
 using namespace std;
-using namespace Grid2d;
 
-public class GameGrid2D {
+class GameGrid2D : public Grid2D {
+public:
 
-    private const int BASE_WIDTH = 8;
-    private Coord2D p1UpRight;
-    private Coord2D p2LowLeft;
+    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness);
+    
+    GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
+        init(thickness, landmarks);
+    }
 
+    GameGrid2D(const Grid2D other) : Grid2D::Grid2D(other) {
+        init(3, 6);
+    }
 
-    private void drawBases() {
+    ~GameGrid2D(){
+        //Thi is a deconstructor    
+    }
+
+private: 
+    const int BASE_WIDTH = 8;
+    Coord2D p1UpRight;
+    Coord2D p2LowLeft;
+    void drawBases() {
         
         int gridX = getGridDimensions().getX();
         int gridY = getGridDimensions().getY();
         
-        Coord2D p1LowLeft = new Coord2D(0, 0);
-        this.p1UpRight    = new Coord2D(p1LowLeft.getX() + BASE_WIDTH,
+        Coord2D p1LowLeft = Coord2D(0, 0);
+        this->p1UpRight = Coord2D(p1LowLeft.getX() + BASE_WIDTH,
                                         p1LowLeft.getY() + BASE_WIDTH);
-        Coord2D p2UpRight = new Coord2D(gridX - 1, gridY - 1);
-        this.p2LowLeft    = new Coord2D(p2UpRight.getX() - BASE_WIDTH + 1,
+        Coord2D p2UpRight = Coord2D(gridX - 1, gridY - 1);
+        this->p2LowLeft = Coord2D(p2UpRight.getX() - BASE_WIDTH + 1,
                                         p2UpRight.getY() - BASE_WIDTH + 1);
         
-        setTypeRect(p1LowLeft, p1UpRight, Tile.TileType.TRAVERSABLE, true);
-        setTypeRect(p2LowLeft, p2UpRight, Tile.TileType.TRAVERSABLE, true);
+        setTypeRect(p1LowLeft, p1UpRight, Tile::TileType::TRAVERSABLE, true);
+        setTypeRect(p2LowLeft, p2UpRight, Tile::TileType::TRAVERSABLE, true);
     }
     
-    private void init(int thickness, int numLandmarks) {
+    void init(int thickness, int numLandmarks) {
         
         // Also initializes p1UpRight and p2LowLeft
         drawBases();
         
-        vector<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks);
-        landmarks.insert(0, p1UpRight);
-        landmarks.insert(landmarks.size(), p2LowLeft);
+        list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks);
+        landmarks.push_front(p1UpRight);
+        landmarks.push_back(p2LowLeft);
         
         assert(landmarks.size() >= 2);               
         // Draw preliminary thin paths with no layers
         vector<Path> fullPath = getFullPath(landmarks, 0);
         for (Path p : fullPath) {
             
-            p.setPathType(Tile.TileType.TRAVERSABLE, false);
+            p.setPathType(Tile::TileType::TRAVERSABLE, false);
         }
         
         // Replace all empty tiles with non-traversables
-        for (Tile t : this) {
+       /* for (Tile t : *(this->grid)) {
             
-            if (t.getType() == Tile.TileType.EMPTY) {
+            if (t.getType() == Tile::TileType::EMPTY) {
                 
-                t.setType(Tile.TileType.NON_TRAVERSABLE);
+                t.setType(Tile::TileType::NON_TRAVERSABLE);
             }
-        }
+        }*/
         
         // Increase thickness of traversables
         fullPath = getFullPath(landmarks, thickness);
         for (Path p : fullPath) {
             
-            p.setPathType(Tile.TileType.TRAVERSABLE, true);
+            p.setPathType(Tile::TileType::TRAVERSABLE, true);
         }
     }
     
@@ -78,10 +92,10 @@ public class GameGrid2D {
 :set mouse=a
      * @return List of distinct Coord2D objects
      */
-    private vector<Coord2D> getDistinctRandomPoints(int amount) {
+    list<Coord2D> getDistinctRandomPoints(int amount) {
         
-        unordered_set<Coord2D, TileHasher, TileComparator> pointsSet;
-        
+        unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
+        list<Coord2D> pointsList;
         // Use the same Random object to ensure correct output
         
         // We use a while loop instead of a for loop
@@ -95,40 +109,46 @@ public class GameGrid2D {
             // so check for duplicates now
             if (!randCoord.equals(p1UpRight) && !randCoord.equals(p2LowLeft))
                 pointsSet.insert(randCoord);
+                pointsList.push_back(randCoord); // wierd fix 
         }
         
         // As far as this function is concerned,
         // order does not matter
-        vector<Coord2D> pointsList = new vector<Coord2D>(pointsSet);
+       // vector<Coord2D> pointsList = new vector<Coord2D>(pointsSet);
         
         return pointsList;
     }
     
-    private vector<Path> getFullPath(vector<Coord2D> landmarks, int thickness) {
+    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
         
-        vector<Path> paths = new vector<Path>(landmarks.size());
-        
+        vector<Path> paths;
+        vector<Coord2D> marks;
+
+        for(auto i : landmarks){
+            marks.push_back(i);
+        } 
+
         for (int i = 0; i < landmarks.size() - 1; i++) {
             
-            Coord2D landmark1 = landmarks.get(i);
-            Coord2D landmark2 = landmarks.get(i + 1);
+            Coord2D landmark1 = marks.at(i);
+            Coord2D landmark2 = marks.at(i + 1);
             
-            Path p = new Path(this, landmark1, landmark2, thickness);
-            paths.add(p);
+            Path p = Path(*this, landmark1, landmark2, thickness);
+            paths.push_back(p);
         }
         
         return paths;
     }
     
-    private Coord2D getRandomNonBase() {
+    Coord2D getRandomNonBase() {
         
-        int xGridBound = getGridDimensions().getX();
-        int yGridBound = getGridDimensions().getY();
-        srand(time(null));
+        int xGridBound = this->Grid2D::getGridDimensions().getX();
+        int yGridBound = this->Grid2D::getGridDimensions().getY();
+        srand(time(NULL));
 
         int x, y;
         
-        x = rand() % xGridBounds;
+        x = rand() % xGridBound;
         
         // if x is within range of base1, y needs to dodge base1
         if (x <= p1UpRight.getX()) {
@@ -148,21 +168,9 @@ public class GameGrid2D {
             y = rand()%(yGridBound);
         }
         
-        return new Coord2D(x, y);
+        return Coord2D(x, y);
     }
     
-    public GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D(dimensions) {
-        init(thickness, landmarks);
-    }
-
-    public GameGrid2D(Grid2D other) : Grid2D(other) {
-        init(3, 6);
-    }
-
-    public ~GameGrid2d(){
-        //This is a deconstructor
-        
-    }
-}    
+};    
 #endif    
 
