@@ -12,6 +12,8 @@
 
 class Grid2D {
 	public:
+		vector<vector<Tile> >* grid;
+		
 		Grid2D();
 		Grid2D(Coord2D dimensions);
 		Grid2D(const Grid2D& other);
@@ -47,8 +49,6 @@ class Grid2D {
 	private:	
 		int ROWS;
 		int COLS;
-	protected: 
-		vector<vector<Tile> >* grid;
 };
 
 Grid2D::Grid2D() {
