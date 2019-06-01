@@ -112,9 +112,9 @@ class Path {
         }
 
         void populateBestPath(Coord2D src, Coord2D dest) {
-            Grid2D tempGrid = Grid2D(*(this->grid));
-            Tile* srcTile = tempGrid.getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
-            Tile* destTile = tempGrid.getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
+            Grid2D* tempGrid = new Grid2D(*(this->grid));
+            Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
+            Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
             srcTile->setDistance(0);
 
             if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
@@ -130,9 +130,18 @@ class Path {
             unordered_set<Tile, TileHasher, TileComparator> setQ;
             setQ.insert(*grid->getTile(Coord2D(0,0)));
 
-            for (Tile t: tempGrid) {
-                if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
-                    setQ.insert(t);
+            // for (Tile t: tempGrid) {
+            //     if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
+            //         setQ.insert(t);
+            //     }
+            // }
+            // iterate through tiles in grid
+            for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
+                for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
+                    Tile tempTile = tempGrid->grid->at(i).at(j);
+                    if(tempTile.getType() != Tile::TileType::NON_TRAVERSABLE) {
+                        setQ.insert(tempTile);
+                    }
                 }
             }
 
@@ -169,7 +178,7 @@ class Path {
                     break;
                 }
 
-                unordered_set<Tile, TileHasher, TileComparator> uNeighbors = tempGrid.getTraversableNeighbors(*uTile->getLocation());
+                unordered_set<Tile, TileHasher, TileComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
 
                 for (Tile thisNeighbor : uNeighbors) {
                     int currentDist = uTile->getDistance() + 1;
