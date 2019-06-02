@@ -13,6 +13,7 @@ class Coord2D {
         int y;
 
     public:
+        Coord2D();
         Coord2D(int x, int y);
         Coord2D(const Coord2D& other);
         int getX() const;
@@ -23,6 +24,11 @@ class Coord2D {
         void operator=(const Coord2D& rhs);
         bool operator==(const Coord2D& rhs);
 };
+
+Coord2D::Coord2D(){
+    this->x = 0;
+    this->y = 0;
+}
 
 //Constructors, take in an X and a Y coordinate.
 Coord2D::Coord2D(int x, int y) {
