@@ -12,7 +12,7 @@
 
 class Grid2D {
 	public:
-		vector<vector<Tile> >* grid;
+		vector<vector<Tile*> >* grid;
 		
 		Grid2D();
 		Grid2D(Coord2D dimensions);
@@ -63,7 +63,7 @@ Grid2D::Grid2D(Coord2D dimensions) {
 	COLS = dimensions.getX();
 
 	// initialize grid to 2D vector with ROWS rows and COLS columns, initialize rows to 0s
-	grid = new vector<vector<Tile> > (ROWS, vector<Tile>(COLS,Tile()));
+	grid = new vector<vector<Tile*> > (ROWS, vector<Tile*>(COLS,NULL));
 	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 		for (int thisCol = 0; thisCol < COLS; thisCol++) {
 				setTile(Tile::TileType::EMPTY, Coord2D(thisCol, thisRow));
@@ -75,7 +75,7 @@ Grid2D::Grid2D(const Grid2D& other) {
 	ROWS = other.ROWS;
 	COLS = other.COLS;
 
-	grid = new vector<vector<Tile> > (ROWS, vector<Tile>(COLS,Tile()));
+	grid = new vector<vector<Tile*> > (ROWS, vector<Tile*>(COLS,NULL));
 
 	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 		for(int thisCol = 0; thisCol < COLS; thisCol++) {
@@ -90,7 +90,7 @@ Grid2D::Grid2D(Grid2D* other) {
 	ROWS = other->ROWS;
 	COLS = other->COLS;
 
-	grid = new vector<vector<Tile> >(ROWS, vector<Tile>(COLS,Tile()));
+	grid = new vector<vector<Tile*> >(ROWS, vector<Tile*>(COLS,NULL));
 	for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 		for(int thisCol = 0; thisCol < COLS; thisCol++) {
 			Coord2D thisCoord2D = Coord2D(thisCol, thisRow);
@@ -123,8 +123,8 @@ std::string Grid2D::toString() {
 			if (thisCol == 0)
 				sb.append("|");
 
-			Tile thisTile = (*grid)[thisRow][thisCol];
-			sb.append(""+thisTile.getChar());
+			Tile* thisTile = (*grid)[thisRow][thisCol];
+			sb.append(""+thisTile->getChar());
 	
 			// Right border
 			if (thisCol == COLS - 1)
@@ -145,13 +145,13 @@ std::string Grid2D::toString() {
 void Grid2D::setTile(Tile::TileType t, Coord2D location) {
 	assertBounds(location);
 
-	(*grid)[location.getY()][location.getX()] = Tile(t, Coord2D(location));
+	(*grid)[location.getY()][location.getX()] = new Tile(t, Coord2D(location)); // FIXME: dont forget to delete
 }
 
 Tile* Grid2D::getTile(Coord2D location) const {
 	assertBounds(location);
 
-	return &((*grid)[location.getY()][location.getX()]);
+	return (*grid)[location.getY()][location.getX()];
 }
 
 void Grid2D::assertBounds(Coord2D location) const {

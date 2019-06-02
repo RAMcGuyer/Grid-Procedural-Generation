@@ -96,8 +96,8 @@ void testIterator() {
 
     for(unsigned int i = 0; i < grid2D.grid->size(); ++i) {
         for(unsigned j = 0; j < grid2D.grid->at(i).size();++j) {
-            Tile tempTile = grid2D.grid->at(i).at(j);
-            tiles.insert(tempTile);
+            Tile* tempTile = grid2D.grid->at(i).at(j);
+            tiles.insert(*tempTile);
         }
     }
 

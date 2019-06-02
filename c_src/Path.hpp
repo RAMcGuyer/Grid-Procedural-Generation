@@ -138,9 +138,9 @@ class Path {
             // iterate through tiles in grid
             for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
                 for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-                    Tile tempTile = tempGrid->grid->at(i).at(j);
-                    if(tempTile.getType() != Tile::TileType::NON_TRAVERSABLE) {
-                        setQ.insert(tempTile);
+                    Tile* tempTile = tempGrid->grid->at(i).at(j);
+                    if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
+                        setQ.insert(*tempTile);
                     }
                 }
             }
