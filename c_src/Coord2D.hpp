@@ -42,11 +42,11 @@ Coord2D::Coord2D(const Coord2D& other) {
 }
 //Getters    
 int Coord2D::getX() const {
-    return x;
+    return this->x;
 }
 
 int Coord2D::getY() const {
-    return y;
+    return this->y;
 }
 
 //Displays contents of object to the console.
