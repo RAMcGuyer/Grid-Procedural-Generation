@@ -16,9 +16,6 @@ using namespace std;
 
 class GameGrid2D : public Grid2D {
 public:
-
-    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness);
-    
     GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
         init(thickness, landmarks);
     }
@@ -51,6 +48,27 @@ private:
         setTypeRect(p2LowLeft, p2UpRight, Tile::TileType::TRAVERSABLE, true);
     }
     
+    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
+        
+        vector<Path> paths;
+        vector<Coord2D> marks;
+
+        for(auto i : landmarks){
+            marks.push_back(i);
+        } 
+
+        for (int i = 0; i < landmarks.size() - 1; i++) {
+            
+            Coord2D landmark1 = marks.at(i);
+            Coord2D landmark2 = marks.at(i + 1);
+            
+            Path p = Path(this, landmark1, landmark2, thickness);
+            paths.push_back(p);
+        }
+        
+        return paths;
+    }
+
     void init(int thickness, int numLandmarks) {
         
         // Also initializes p1UpRight and p2LowLeft
@@ -122,26 +140,6 @@ private:
         return pointsList;
     }
     
-    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
-        
-        vector<Path> paths;
-        vector<Coord2D> marks;
-
-        for(auto i : landmarks){
-            marks.push_back(i);
-        } 
-
-        for (int i = 0; i < landmarks.size() - 1; i++) {
-            
-            Coord2D landmark1 = marks.at(i);
-            Coord2D landmark2 = marks.at(i + 1);
-            
-            Path p = Path(*this, landmark1, landmark2, thickness);
-            paths.push_back(p);
-        }
-        
-        return paths;
-    }
     
     Coord2D getRandomNonBase() {
         
