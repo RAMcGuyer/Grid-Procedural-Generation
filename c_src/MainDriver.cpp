@@ -10,6 +10,7 @@
 #include "Path.hpp"
 #include "Grid2D.hpp"
 #include "Hash.hpp"
+#include "GameGrid2D.hpp"
 
 using namespace std;
 
@@ -22,9 +23,9 @@ void testMarkRow();
 void testGrid();
 void testSetOfPoints();
 
-int main(int argc, char* argv) {
+int main(int argc, char** argv) {
     cout << "Hello World!" << endl;
-    if(arc > 2) {
+    if(argc > 2) {
         cout << "Too many arguments!" << endl;
         exit(1);
     }
@@ -32,7 +33,7 @@ int main(int argc, char* argv) {
         testGenerateGameGrid(INT_MAX);
     }
     else {
-        int numOfGrids = argv[1];
+        int numOfGrids = atoi(argv[1]);
         testGenerateGameGrid(numOfGrids);
     }
 }
@@ -70,14 +71,14 @@ void testDijkstra() {
 
     Coord2D pointA = Coord2D(1,1);
     Coord2D pointB = Coord2D(9,8);
-    grid.getTile(pointA).setType(Tile::TileType::TRAVERSABLE);
-    grid.getTile(pointB).setType(Tile::TileType::TRAVERSABLE);
+    grid.getTile(pointA)->setType(Tile::TileType::TRAVERSABLE);
+    grid.getTile(pointB)->setType(Tile::TileType::TRAVERSABLE);
 
     cout << "Grid with pointA = " << pointA.toString() << endl;
     cout << "          pointB = " << pointB.toString() << endl;
     cout << grid.toString() << endl;
 
-    Path path = Path(grid, pointA, pointB, 1);
+    Path path = Path(&grid, pointA, pointB, 1);
     path.setPathType(Tile::TileType::TRAVERSABLE, false);
 
     cout << "Grid with best route:\n" << grid.toString() << endl;
@@ -85,13 +86,21 @@ void testDijkstra() {
 
 void testIterator() {
     Coord2D gridDimensions = Coord2D(50,50);
-    Grid2D grid = Grid2D(gridDimensions);
+    Grid2D grid2D = Grid2D(gridDimensions);
 
-    unordered_set<Tile> tiles;
-    tiles.insert(grid.getTile(Coord2D(0,0)));
-    for (Tile t : grid) {
-        tiles.insert(t);
+    unordered_set<Tile,TileHasher,TileComparator> tiles;
+    tiles.insert(*grid2D.getTile(Coord2D(0,0)));
+    // for (Tile t : grid) {
+    //     tiles.insert(t);
+    // }
+
+    for(unsigned int i = 0; i < grid2D.grid->size(); ++i) {
+        for(unsigned j = 0; j < grid2D.grid->at(i).size();++j) {
+            Tile tempTile = grid2D.grid->at(i).at(j);
+            tiles.insert(tempTile);
+        }
     }
+
     cout << "Expected size: " << gridDimensions.getX()*gridDimensions.getY() << endl;
     cout << "Num of tiles: " << tiles.size() << endl;
 }
@@ -100,7 +109,7 @@ void testPaths() {
     Grid2D grid = Grid2D(Coord2D(50,50));
     cout << "Empty grid: \n\n" << grid.toString() << endl;
 
-    Path path = Path(grid);
+    Path path = Path(&grid);
     assert(path.addJoint(Coord2D(10,1)));
     assert(path.addJoint(Coord2D(10, 2)));
     assert(path.addJoint(Coord2D(30, 2)));
@@ -121,10 +130,10 @@ void testMarkRect() {
 
     cout << "Empty grid:\n" << grid.toString() << endl;
 
-    Coord2D middlBand_lowLeft = Coord2D(0,3);
+    Coord2D middleBand_lowLeft = Coord2D(0,3);
     Coord2D middleBand_upRight = Coord2D(gridDimensions.getX()-1, 6);
 
-    cout << "Marking a band in the middle:") <<endl;
+    cout << "Marking a band in the middle:" <<endl;
     grid.markRect(middleBand_lowLeft, middleBand_upRight, true);
 
     cout << grid.toString() << endl;
@@ -132,7 +141,7 @@ void testMarkRect() {
 
 void testMarkRow() {
     Coord2D gridDimensions = Coord2D(10,10);
-    Grid2D = Grid2D(gridDimensions);
+    Grid2D grid = Grid2D(gridDimensions);
 
     cout << "Empty grid:\n" << grid.toString() <<endl;
 
@@ -140,11 +149,11 @@ void testMarkRow() {
     Coord2D lowbar_right = Coord2D(gridDimensions.getX()-1, lowbar_left.getY());
 
     cout << "Marking lower bar..." <<endl;
-    grid.setTypeLine(lowbar_left, lowbar_right, Tile::TileType::TRAVERSAGBLE, 0,true);
+    grid.setTypeLine(lowbar_left, lowbar_right, Tile::TileType::TRAVERSABLE, 0,true);
     cout << grid.toString() <<endl;
 
     Coord2D vertbar_down = Coord2D(2,0);
-    Coord2D vertbar_up = Coord2D(verbar_down.getX(), gridDimensions.getY()-1);
+    Coord2D vertbar_up = Coord2D(vertbar_down.getX(), gridDimensions.getY()-1);
 
     cout << "Marking vert bar..." << endl;
     grid.setTypeLine(vertbar_down, vertbar_up, Tile::TileType::TRAVERSABLE,2,true);
@@ -169,8 +178,8 @@ void testGrid() {
     cout << "Can testPoint go left? " << (grid.canGoLeft(testPoint) ? "true" : "false") << endl;
     cout << "Can testPoint go right? " << (grid.canGoRight(testPoint) ? "true" : "false") << endl;
 
-    cout << "Getting the up of testPoint:" << grid.getUp(testPoint).toString() << endl;
-    cout << "Getting testPoint manually:" << grid.getTile(testPoint).toString() <<endl;
+    cout << "Getting the up of testPoint:" << grid.getUp(testPoint)->toString() << endl;
+    cout << "Getting testPoint manually:" << grid.getTile(testPoint)->toString() <<endl;
 
     cout << grid.toString() << endl;
 }
@@ -183,24 +192,25 @@ void testSetOfPoints() {
     assert(&original != &duplicate);
     assert(duplicate.equals(original));
 
-    unordered_set<Coord2D> set = unordered_set<Coord2D>(3);
+    // unordered_set<Coord2D,Coord2DHasher,Coord2DComparator> set = unordered_set<Coord2D>(3);
+    unordered_set<Coord2D,Coord2DHasher,Coord2DComparator> set;
     set.insert(original);
     cout << "Set contains original. Contains duplicate? " << ((set.find(duplicate) == set.end()) ? "true":"false") << endl;
     set.insert(duplicate);
     set.insert(anotherone);
 
-    list<Coord2D> list = list<Coord2D>();
+    list<Coord2D> list;
     for (Coord2D element : set) {
         list.push_back(element);
     }
     cout << "Set: ";
     for (Coord2D element : set) {
-        cout << element << " ";
+        cout << element.toString() << " ";
     }
     cout << endl;
     cout << "List: ";
     for (Coord2D element : list) {
-        cout << element << " ";
+        cout << element.toString() << " ";
     }
     cout << endl;
 }
