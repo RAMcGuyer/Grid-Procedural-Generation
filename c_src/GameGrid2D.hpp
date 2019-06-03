@@ -60,8 +60,8 @@ private:
         
         // Also initializes p1UpRight and p2LowLeft
         drawBases();
-        
-        list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks);
+        unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
+        list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks, pointsSet);
         landmarks.push_front(p1UpRight);
         landmarks.push_back(p2LowLeft);
         
@@ -112,9 +112,9 @@ private:
 :set mouse=a
      * @return List of distinct Coord2D objects
      */
-    list<Coord2D> getDistinctRandomPoints(int amount) {
+    list<Coord2D> getDistinctRandomPoints(int amount, unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet) {
         
-        unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
+        // unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
         list<Coord2D> pointsList;
         // Use the same Random object to ensure correct output
         
