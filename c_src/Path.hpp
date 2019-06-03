@@ -26,6 +26,10 @@ class Path {
             this->thickness=0;
         }
         Path(Grid2D* grid, Coord2D point1, Coord2D point2, int thickness) {
+            if(this == 0) {
+            cout << "THIS IS 0"<<endl;
+            exit(1);
+            }
             this->grid=grid;
             this->joints= new list<Coord2D>();
             this->thickness=thickness;
@@ -112,6 +116,10 @@ class Path {
         }
 
         void populateBestPath(Coord2D src, Coord2D dest) {
+            if(this == 0) {
+            cout << "THIS IS 0"<<endl;
+            exit(1);
+            }
             Grid2D* tempGrid = new Grid2D(*(this->grid));
             Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
             Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
@@ -128,6 +136,7 @@ class Path {
             }
 
             unordered_set<Tile, TileHasher, TileComparator> setQ;
+            // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
             setQ.insert(*grid->getTile(Coord2D(0,0)));
 
             // for (Tile t: tempGrid) {
@@ -140,6 +149,7 @@ class Path {
                 for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
                     Tile* tempTile = tempGrid->grid->at(i).at(j);
                     if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
+                        // cout<<"INSERTING TILE:\n"<<tempTile->toString()<<endl;
                         setQ.insert(*tempTile);
                     }
                 }

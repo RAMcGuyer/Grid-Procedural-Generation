@@ -1,6 +1,7 @@
 #ifndef __HASH_HPP__
 #define __HASH_HPP__
 
+#include <iostream>
 #include "Tile.hpp"
 #include "Coord2D.hpp"
 
@@ -12,6 +13,16 @@ struct TileHasher {
 
 struct TileComparator {
     bool operator()(const Tile& tileObj1, const Tile& tileObj2) const {
+			if(tileObj1.getLocation() == 0) {
+				std::cout<<"1"<<std::endl;
+				std::cout<<tileObj1.toString()<<std::endl;
+				exit(1);
+			}
+			if(tileObj2.getLocation() == 0) {
+				std::cout<<"2"<<std::endl;
+				std::cout<<tileObj2.toString()<<std::endl;
+				exit(1);
+			}
 		if(
 			tileObj1.getLocation()->getX() == tileObj2.getLocation()->getX()
 			&& tileObj1.getLocation()->getY() == tileObj2.getLocation()->getY()

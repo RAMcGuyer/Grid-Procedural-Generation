@@ -16,8 +16,13 @@ using namespace std;
 
 class GameGrid2D : public Grid2D {
 public:
+
+    // vector<Path> getFullPath(list<Coord2D> landmarks, int thickness);
+    
     GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
+        // cout<<"test1"<<endl;
         init(thickness, landmarks);
+        // cout<<"test2"<<endl;
     }
 
     GameGrid2D(const Grid2D other) : Grid2D::Grid2D(other) {
@@ -33,7 +38,7 @@ private:
     Coord2D p1UpRight;
     Coord2D p2LowLeft;
     void drawBases() {
-        
+        // cout<<"drawBases()"<<endl;
         int gridX = getGridDimensions().getX();
         int gridY = getGridDimensions().getY();
         
@@ -48,28 +53,11 @@ private:
         setTypeRect(p2LowLeft, p2UpRight, Tile::TileType::TRAVERSABLE, true);
     }
     
-    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
-        
-        vector<Path> paths;
-        vector<Coord2D> marks;
-
-        for(auto i : landmarks){
-            marks.push_back(i);
-        } 
-
-        for (int i = 0; i < landmarks.size() - 1; i++) {
-            
-            Coord2D landmark1 = marks.at(i);
-            Coord2D landmark2 = marks.at(i + 1);
-            
-            Path p = Path(this, landmark1, landmark2, thickness);
-            paths.push_back(p);
-        }
-        
-        return paths;
-    }
-
     void init(int thickness, int numLandmarks) {
+        if(this == 0) {
+            cout << "THIS IS 0"<<endl;
+            exit(1);
+        }
         
         // Also initializes p1UpRight and p2LowLeft
         drawBases();
@@ -77,15 +65,18 @@ private:
         list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks);
         landmarks.push_front(p1UpRight);
         landmarks.push_back(p2LowLeft);
+        // cout<<"init after pushes"<<endl;
         
         assert(landmarks.size() >= 2);               
         // Draw preliminary thin paths with no layers
+        // cout<<"init before 1getting fullpath"<<endl;
         vector<Path> fullPath = getFullPath(landmarks, 0);
+        // cout << "init after 1getting fullpath"<<endl;
         for (Path p : fullPath) {
             
             p.setPathType(Tile::TileType::TRAVERSABLE, false);
         }
-        
+        // cout <<"init after for"<<endl;
         // Replace all empty tiles with non-traversables
        /* for (Tile t : *(this->grid)) {
             
@@ -97,10 +88,12 @@ private:
         
         // Increase thickness of traversables
         fullPath = getFullPath(landmarks, thickness);
+        // cout << "init after 2getting fullpath"<<endl;
         for (Path p : fullPath) {
             
             p.setPathType(Tile::TileType::TRAVERSABLE, true);
         }
+        // cout << "returning init"<<endl;
     }
     
     
@@ -122,6 +115,7 @@ private:
         // We use a while loop instead of a for loop
         // because there's a small chance
         // that we could accidentally generate duplicate Coord2D's
+        cout <<"getDRP before while" <<endl;
         while (pointsSet.size() < amount) {
             
             Coord2D randCoord = getRandomNonBase();
@@ -132,7 +126,7 @@ private:
                 pointsSet.insert(randCoord);
                 pointsList.push_back(randCoord); // wierd fix 
         }
-        
+        cout <<"getDRP after while" <<endl;
         // As far as this function is concerned,
         // order does not matter
        // vector<Coord2D> pointsList = new vector<Coord2D>(pointsSet);
@@ -140,6 +134,35 @@ private:
         return pointsList;
     }
     
+    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
+        if(this == 0) {
+            cout << "THIS IS 0"<<endl;
+            exit(1);
+        }
+
+        vector<Path> paths;
+        vector<Coord2D> marks;
+
+        for(auto i : landmarks){
+            marks.push_back(i);
+        } 
+        cout <<"gFP before for"<<endl;
+        for (int i = 0; i < landmarks.size() - 1; i++) {
+            
+            Coord2D landmark1 = marks.at(i);
+            Coord2D landmark2 = marks.at(i + 1);
+            cout << "gFP before Path for i:"<<i<<endl;
+            if(this == 0) {
+            cout << "THIS IS 0"<<endl;
+            exit(1);
+            }
+            Path p = Path(this, landmark1, landmark2, thickness);
+            cout <<"gFP after Path"<<endl;
+            paths.push_back(p);
+        }
+        cout <<"gFP after for"<<endl;
+        return paths;
+    }
     
     Coord2D getRandomNonBase() {
         

@@ -27,7 +27,7 @@ class Tile {
         bool isMarked();
         void setMark(bool mark);
         void setType(TileType t);
-        string toString();
+        string toString() const;
         void setDistance(int distance);
         int getDistance();
         void setPreviousTile(Tile* prev);
@@ -70,16 +70,18 @@ Tile::Tile(TileType type, bool mark) {
     this->type=type;
     this->distance=INT_MAX;
     this->prev=NULL;
+    this->location=NULL;
 }
 Tile::Tile(const Tile& t) {
     this->marked=t.marked;
     this->type=t.type;
     this->distance=INT_MAX;
     this->prev=NULL;
+    this->location=new Coord2D(*(t.location));
 }
 
 Tile::~Tile() {
-    delete location;
+    // delete location;
 }
 
 char Tile::getChar() {
@@ -118,14 +120,14 @@ void Tile::setType(TileType t) {
     this->type=t;
 }
 
-string Tile::toString() {
+string Tile::toString() const {
     // returns string: "TileType <type>, <_ OR not> marked, distance = <distance>, location <location>"
     string typestr = (string[]){"EMPTY","TRAVERSABLE","NON_TRAVERSABLE"}[this->type];
     // string info = "";
     // info.append("TileType ").append(typestr).append(", ").append(marked ? "":"not ").append(
     //     "marked, distance = ").append(distance).append(", location ").append(location.toString()); // does location have a custom toString defined?
     // return info;
-    return "TileType " + typestr + ", " + (marked ? "": "not ") + "marked, distance = " + std::to_string(distance) + ", location " + location->toString();
+    return "TileType " + typestr + ", " + (marked ? "": "not ") + "marked, distance = " + std::to_string(distance) + ", location " + (location?location->toString():"NULL");
 }
 
 void Tile::setDistance(int distance) {   
