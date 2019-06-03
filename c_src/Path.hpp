@@ -41,6 +41,11 @@ class Path {
             this->thickness=thickness;
         }
 
+        ~Path() {
+            // anything here?
+            // for sure dont delete joints
+        }
+
         bool areCompatibleJoints(Coord2D joint1, Coord2D joint2) {
             return joint1.getX() == joint2.getX() || joint1.getY() == joint2.getY();
         }
@@ -219,6 +224,12 @@ class Path {
                     "src.equals(dest)? " << src.equals(dest);
 
                     exit(1);
+                }
+            }
+            // delete tempGrid
+            for(unsigned i = 0; i < tempGrid->grid->size();++i) {
+                for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
+                    delete tempGrid->grid->at(i).at(j);
                 }
             }
         }

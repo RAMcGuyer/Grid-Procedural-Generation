@@ -102,7 +102,12 @@ Grid2D::Grid2D(Grid2D* other) {
 }
 
 Grid2D::~Grid2D() {
-    delete grid;
+    //delete grid;
+    for(unsigned i = 0; i<grid->size(); ++i) {
+        for(unsigned j = 0; j < grid->at(i).size();++j) {
+            delete grid->at(i).at(j);
+        }
+    }
 }
 
 std::string Grid2D::toString() {

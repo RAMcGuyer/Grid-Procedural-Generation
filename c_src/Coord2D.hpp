@@ -16,6 +16,7 @@ class Coord2D {
         Coord2D();
         Coord2D(int x, int y);
         Coord2D(const Coord2D& other);
+        ~Coord2D();
         int getX() const;
         int getY() const;
         std::string toString();
@@ -39,6 +40,10 @@ Coord2D::Coord2D(int x, int y) {
 Coord2D::Coord2D(const Coord2D& other) {
     this->x = other.x;
     this->y = other.y;
+}
+
+Coord2D::~Coord2D(){
+//This is a deconstructor
 }
 //Getters    
 int Coord2D::getX() const {

@@ -81,7 +81,7 @@ Tile::Tile(const Tile& t) {
 }
 
 Tile::~Tile() {
-    // delete location;
+    delete location;
 }
 
 std::string Tile::getChar() const {
