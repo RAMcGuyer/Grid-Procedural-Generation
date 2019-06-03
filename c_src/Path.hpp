@@ -120,10 +120,11 @@ class Path {
             cout << "THIS IS 0"<<endl;
             exit(1);
             }
-            Grid2D* tempGrid = new Grid2D(*(this->grid));
+            Grid2D* tempGrid = new Grid2D(*(this->grid)); // FIXME: error here?
             Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
             Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
             srcTile->setDistance(0);
+            cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
 
             if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
             if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
@@ -136,7 +137,8 @@ class Path {
             }
 
             unordered_set<Tile, TileHasher, TileComparator> setQ;
-            // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
+            cout<< "grid:\n"<<grid->toString()<<endl;
+            cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
             setQ.insert(*grid->getTile(Coord2D(0,0)));
 
             // for (Tile t: tempGrid) {
@@ -164,10 +166,11 @@ class Path {
             }
 
             Tile* uTile = NULL;
-
+            // FIXME: setQ's tile distances are not set
             while(!setQ.empty()) {
                 int runningMin = INT_MAX;
 
+                // here the first tile's distance should be 0
                 for (Tile t : setQ) {
                     if(t.getDistance() < runningMin) {
                         runningMin = t.getDistance();
@@ -183,6 +186,7 @@ class Path {
                     cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
                     exit(1);
                 }
+                setQ.erase(*uTile);
 
                 if(uTile == destTile) { 
                     break;
@@ -199,7 +203,7 @@ class Path {
                 }
             }
 
-            if (uTile->getPreviousTile() == NULL || uTile == srcTile) {
+            if (uTile->getPreviousTile() == NULL && uTile != srcTile) {
                 cout << "Condition specified by Dijkstra's not met" << endl;
                 exit(1);
             }

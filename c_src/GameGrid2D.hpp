@@ -38,7 +38,6 @@ private:
     Coord2D p1UpRight;
     Coord2D p2LowLeft;
     void drawBases() {
-        // cout<<"drawBases()"<<endl;
         int gridX = getGridDimensions().getX();
         int gridY = getGridDimensions().getY();
         
@@ -65,18 +64,18 @@ private:
         list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks);
         landmarks.push_front(p1UpRight);
         landmarks.push_back(p2LowLeft);
-        // cout<<"init after pushes"<<endl;
         
         assert(landmarks.size() >= 2);               
         // Draw preliminary thin paths with no layers
-        // cout<<"init before 1getting fullpath"<<endl;
+        cout<<"init landmarks:\n"<<endl;
+        for (auto lm:landmarks) {
+            cout<<lm.toString()<<endl;
+        }
         vector<Path> fullPath = getFullPath(landmarks, 0);
-        // cout << "init after 1getting fullpath"<<endl;
         for (Path p : fullPath) {
             
             p.setPathType(Tile::TileType::TRAVERSABLE, false);
         }
-        // cout <<"init after for"<<endl;
         // Replace all empty tiles with non-traversables
        /* for (Tile t : *(this->grid)) {
             
@@ -116,15 +115,18 @@ private:
         // because there's a small chance
         // that we could accidentally generate duplicate Coord2D's
         cout <<"getDRP before while" <<endl;
+        Coord2D randCoord;
         while (pointsSet.size() < amount) {
             
-            Coord2D randCoord = getRandomNonBase();
+            randCoord = getRandomNonBase();
             
             // These two will populate pointsSet later,
             // so check for duplicates now
             if (!randCoord.equals(p1UpRight) && !randCoord.equals(p2LowLeft))
                 pointsSet.insert(randCoord);
-                pointsList.push_back(randCoord); // wierd fix 
+        }
+        for(auto point:pointsSet) {
+            pointsList.push_back(point);
         }
         cout <<"getDRP after while" <<endl;
         // As far as this function is concerned,
