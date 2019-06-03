@@ -11,12 +11,6 @@ struct TileHasher {
 	}
 };
 
-struct TilePtrHasher {
-    size_t operator()(Tile* tileObj) const {
-		return std::hash<int>()(tileObj->getLocation()->hashCode());
-	}
-};
-
 struct TileComparator {
     bool operator()(const Tile& tileObj1, const Tile& tileObj2) const {
 			if(tileObj1.getLocation() == 0) {
@@ -32,30 +26,6 @@ struct TileComparator {
 		if(
 			tileObj1.getLocation()->getX() == tileObj2.getLocation()->getX()
 			&& tileObj1.getLocation()->getY() == tileObj2.getLocation()->getY()
-		) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-};
-
-struct TilePtrComparator {
-    bool operator()(Tile* tileObj1, Tile* tileObj2) const {
-			if(tileObj1->getLocation() == 0) {
-				std::cout<<"1"<<std::endl;
-				std::cout<<tileObj1->toString()<<std::endl;
-				exit(1);
-			}
-			if(tileObj2->getLocation() == 0) {
-				std::cout<<"2"<<std::endl;
-				std::cout<<tileObj2->toString()<<std::endl;
-				exit(1);
-			}
-		if(
-			tileObj1->getLocation()->getX() == tileObj2->getLocation()->getX()
-			&& tileObj1->getLocation()->getY() == tileObj2->getLocation()->getY()
 		) {
 			return true;
 		}
