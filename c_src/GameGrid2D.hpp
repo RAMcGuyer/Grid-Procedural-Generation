@@ -84,6 +84,13 @@ private:
                 t.setType(Tile::TileType::NON_TRAVERSABLE);
             }
         }*/
+        for(unsigned j = 0; j < this->grid->size(); j++){
+            for(unsigned k = 0; k < this->grid->at(j).size(); k++){
+                if(this->grid->at(j).at(k)->getType() == Tile::TileType::EMPTY){
+                   this->grid->at(j).at(k)->setType(Tile::TileType::NON_TRAVERSABLE);  
+                }
+            }
+        }
         
         // Increase thickness of traversables
         fullPath = getFullPath(landmarks, thickness);
