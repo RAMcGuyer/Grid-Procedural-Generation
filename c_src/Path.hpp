@@ -136,7 +136,27 @@ class Path {
                 exit(1);
             }
 
-            unordered_set<Tile, TileHasher, TileComparator> setQ;
+            unordered_set<Tile*, TilePtrHasher, TileComparator> setQ;
+    vector<Path> getFullPath(list<Coord2D> landmarks, int thickness) {
+        
+        vector<Path> paths;
+        vector<Coord2D> marks;
+
+        for(auto i : landmarks){
+            marks.push_back(i);
+        } 
+
+        for (int i = 0; i < landmarks.size() - 1; i++) {
+            
+            Coord2D landmark1 = marks.at(i);
+            Coord2D landmark2 = marks.at(i + 1);
+            
+            Path p = Path(this->grid, landmark1, landmark2, thickness);
+            paths.push_back(p);
+        }
+        
+        return paths;
+    }
             cout<< "grid:\n"<<grid->toString()<<endl;
             cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
             setQ.insert(*grid->getTile(Coord2D(0,0)));
@@ -192,7 +212,7 @@ class Path {
                     break;
                 }
 
-                unordered_set<Tile, TileHasher, TileComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
+                unordered_set<Tile*, TilePtrHasher, TileComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
 
                 for (Tile thisNeighbor : uNeighbors) {
                     int currentDist = uTile->getDistance() + 1;
