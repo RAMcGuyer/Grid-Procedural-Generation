@@ -2,7 +2,7 @@
 #define __TILE_HPP__
 
 #include <climits>
-
+#include <string>
 #include "Coord2D.hpp"
 
 using namespace std;
@@ -22,7 +22,7 @@ class Tile {
         Tile(TileType type, bool mark);
         Tile(const Tile& t);
         ~Tile();
-        char getChar();
+        std::string getChar();
         Tile::TileType getType();
         bool isMarked();
         void setMark(bool mark);
@@ -75,8 +75,8 @@ Tile::Tile(TileType type, bool mark) {
 Tile::Tile(const Tile& t) {
     this->marked=t.marked;
     this->type=t.type;
-    this->distance=INT_MAX;
-    this->prev=NULL;
+    this->distance=t.distance; // java file has this INT_MAX
+    this->prev=t.prev; // java file has this NULL
     this->location=new Coord2D(*(t.location));
 }
 
@@ -84,23 +84,23 @@ Tile::~Tile() {
     // delete location;
 }
 
-char Tile::getChar() {
+std::string Tile::getChar() {
     if (isMarked()) {
-        return '*';
+        return "*";
     }
     switch (type)
     {
     case EMPTY:
-        return '.';
+        return ".";
         break;
     case TRAVERSABLE:
-        return 't';
+        return "t";
         break;
     case NON_TRAVERSABLE:
-        return 'N';
+        return "N";
         break;
     default:
-        return '?';
+        return "?";
         break;
     }
 }
