@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <iostream>
 
 #include "Tile.hpp"
 #include "Coord2D.hpp"
@@ -27,7 +28,7 @@ class Grid2D {
 		bool checkBounds(Coord2D location) const;
 		Coord2D getGridDimensions();
 		int size();
-		char getChar(Coord2D location);
+		std::string getChar(Coord2D location);
 		bool canGoUp(Coord2D location);
 		bool canGoDown(Coord2D location);
 		bool canGoLeft(Coord2D location);
@@ -105,10 +106,12 @@ Grid2D::~Grid2D() {
 }
 
 std::string Grid2D::toString() {
+	std::cout<<"DIM:"<<ROWS<<"X"<<COLS<<std::endl;
 	std::string sb;
-	sb.resize((ROWS + 2) * (COLS + 3) + 1);
+	// sb.resize((ROWS + 2) * (COLS + 3) + 1);
 
 	// Top row border
+
 	sb.append("*");
 	for (int i = 0; i < COLS; i++)
 		sb.append("-");
@@ -124,12 +127,13 @@ std::string Grid2D::toString() {
 				sb.append("|");
 
 			Tile* thisTile = (*grid)[thisRow][thisCol];
-			sb.append(""+thisTile->getChar());
+			sb.append(thisTile->getChar());
 	
 			// Right border
 			if (thisCol == COLS - 1)
 				sb.append("|");
 		}
+		sb.append("\n");
 	}
 
 	// Bottom row border
@@ -176,7 +180,7 @@ int Grid2D::size() {
 	return ROWS * COLS;
 }
 
-char Grid2D::getChar(Coord2D location) {
+std::string Grid2D::getChar(Coord2D location) {
 	return getTile(location)->getChar();
 }
 
