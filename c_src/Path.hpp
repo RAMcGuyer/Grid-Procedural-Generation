@@ -136,10 +136,10 @@ class Path {
                 exit(1);
             }
 
-            unordered_set<Tile, TileHasher, TileComparator> setQ;
+            unordered_set<Tile*, TilePtrHasher, TilePtrComparator> setQ;
             cout<< "grid:\n"<<grid->toString()<<endl;
             cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
-            setQ.insert(*grid->getTile(Coord2D(0,0)));
+            setQ.insert(grid->getTile(Coord2D(0,0)));
 
             // for (Tile t: tempGrid) {
             //     if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
@@ -152,16 +152,16 @@ class Path {
                     Tile* tempTile = tempGrid->grid->at(i).at(j);
                     if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
                         // cout<<"INSERTING TILE:\n"<<tempTile->toString()<<endl;
-                        setQ.insert(*tempTile);
+                        setQ.insert(tempTile);
                     }
                 }
             }
 
-            if(setQ.find(*srcTile) == setQ.end()) {
+            if(setQ.find(srcTile) == setQ.end()) {
                 cout << "setQ doesn't contain srcTile" << endl;
                 exit(1);
             }
-            if(setQ.find(*destTile) == setQ.end()) {
+            if(setQ.find(destTile) == setQ.end()) {
                 cout << "setQ doesn't contain destTile" << endl;
             }
 
@@ -171,10 +171,11 @@ class Path {
                 int runningMin = INT_MAX;
 
                 // here the first tile's distance should be 0
-                for (Tile t : setQ) {
-                    if(t.getDistance() < runningMin) {
-                        runningMin = t.getDistance();
-                        uTile = &t;
+                for (Tile* t : setQ) {
+                    if(t->getDistance() < runningMin) {
+                        // cout<<"TEST"<<endl;
+                        runningMin = t->getDistance();
+                        uTile = t;
                     }
                 }
 
@@ -182,23 +183,23 @@ class Path {
                     cout << "Minimum distance tile uTile not properly set" << endl;
                     exit(1);
                 }
-                if(setQ.find(*uTile) == setQ.end()) {
+                if(setQ.find(uTile) == setQ.end()) {
                     cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
                     exit(1);
                 }
-                setQ.erase(*uTile);
+                setQ.erase(uTile);
 
                 if(uTile == destTile) { 
                     break;
                 }
 
-                unordered_set<Tile, TileHasher, TileComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
+                unordered_set<Tile*, TilePtrHasher, TilePtrComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
 
-                for (Tile thisNeighbor : uNeighbors) {
+                for (Tile* thisNeighbor : uNeighbors) {
                     int currentDist = uTile->getDistance() + 1;
-                    if (currentDist < thisNeighbor.getDistance()) {
-                        thisNeighbor.setDistance(currentDist);
-                        thisNeighbor.setPreviousTile(uTile);
+                    if (currentDist < thisNeighbor->getDistance()) {
+                        thisNeighbor->setDistance(currentDist);
+                        thisNeighbor->setPreviousTile(uTile);
                     }
                 }
             }
