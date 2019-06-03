@@ -42,7 +42,7 @@ class Grid2D {
 		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize);
 		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize);
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
-		std::unordered_set<Tile, TileHasher, TileComparator> getTraversableNeighbors(Coord2D location);
+		std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> getTraversableNeighbors(Coord2D location);
 
 		// begin();
 		// end();
@@ -397,35 +397,35 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	}
 }
 
-std::unordered_set<Tile, TileHasher, TileComparator> Grid2D::getTraversableNeighbors(Coord2D location) {
-	std::unordered_set<Tile, TileHasher, TileComparator> neighbors;
+std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> Grid2D::getTraversableNeighbors(Coord2D location) {
+	std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> neighbors;
 
 	if (canGoUp(location)) {
 		Tile* upNeighbor = getUp(location);
 
 		if (upNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
-			neighbors.insert(*upNeighbor);
+			neighbors.insert(upNeighbor);
 	}
 
 	if (canGoDown(location)) {
 		Tile* downNeighbor = getDown(location);
 
 		if (downNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
-			neighbors.insert(*downNeighbor);
+			neighbors.insert(downNeighbor);
 	}
 
 	if (canGoLeft(location)) {
 		Tile* leftNeighbor = getLeft(location);
 
 		if (leftNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
-			neighbors.insert(*leftNeighbor);
+			neighbors.insert(leftNeighbor);
 	}
 
 	if (canGoRight(location)) {
 		Tile* rightNeighbor = getRight(location);
 
 		if (rightNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE)
-			neighbors.insert(*rightNeighbor);
+			neighbors.insert(rightNeighbor);
 	}
 
 	return neighbors;

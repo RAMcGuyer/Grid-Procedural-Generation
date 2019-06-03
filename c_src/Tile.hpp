@@ -22,16 +22,16 @@ class Tile {
         Tile(TileType type, bool mark);
         Tile(const Tile& t);
         ~Tile();
-        std::string getChar();
-        Tile::TileType getType();
-        bool isMarked();
+        std::string getChar() const;
+        Tile::TileType getType() const;
+        bool isMarked() const;
         void setMark(bool mark);
         void setType(TileType t);
         string toString() const;
         void setDistance(int distance);
-        int getDistance();
+        int getDistance() const;
         void setPreviousTile(Tile* prev);
-        Tile* getPreviousTile();
+        Tile* getPreviousTile() const;
         Coord2D* getLocation() const;
 
     private:
@@ -84,7 +84,7 @@ Tile::~Tile() {
     // delete location;
 }
 
-std::string Tile::getChar() {
+std::string Tile::getChar() const {
     if (isMarked()) {
         return "*";
     }
@@ -105,10 +105,10 @@ std::string Tile::getChar() {
     }
 }
 
-Tile::TileType Tile::getType() {
+Tile::TileType Tile::getType() const {
     return type;
 }
-bool Tile::isMarked() {
+bool Tile::isMarked() const {
     return marked;
 }
 
@@ -134,7 +134,7 @@ void Tile::setDistance(int distance) {
     this->distance = distance;
 }
 
-int Tile::getDistance() {
+int Tile::getDistance() const {
     return distance;
 }
 
@@ -142,7 +142,7 @@ void Tile::setPreviousTile(Tile* prev) {
     this->prev = prev;
 }
 
-Tile* Tile::getPreviousTile() {
+Tile* Tile::getPreviousTile() const {
     return prev;
 }
 

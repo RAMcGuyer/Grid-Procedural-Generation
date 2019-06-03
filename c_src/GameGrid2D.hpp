@@ -72,7 +72,7 @@ private:
             cout<<lm.toString()<<endl;
         }
         vector<Path> fullPath = getFullPath(landmarks, 0);
-        for (Path p : fullPath) {
+        for (Path& p : fullPath) {
             
             p.setPathType(Tile::TileType::TRAVERSABLE, false);
         }
@@ -88,7 +88,7 @@ private:
         // Increase thickness of traversables
         fullPath = getFullPath(landmarks, thickness);
         // cout << "init after 2getting fullpath"<<endl;
-        for (Path p : fullPath) {
+        for (Path& p : fullPath) {
             
             p.setPathType(Tile::TileType::TRAVERSABLE, true);
         }
@@ -125,7 +125,7 @@ private:
             if (!randCoord.equals(p1UpRight) && !randCoord.equals(p2LowLeft))
                 pointsSet.insert(randCoord);
         }
-        for(auto point:pointsSet) {
+        for(auto point:pointsSet) { 
             pointsList.push_back(point);
         }
         cout <<"getDRP after while" <<endl;
