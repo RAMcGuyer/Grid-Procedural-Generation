@@ -124,7 +124,7 @@ class Path {
             Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
             Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
             srcTile->setDistance(0);
-            cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
+            // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
 
             if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
             if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
@@ -137,8 +137,8 @@ class Path {
             }
 
             unordered_set<Tile*, TilePtrHasher, TilePtrComparator> setQ;
-            cout<< "grid:\n"<<grid->toString()<<endl;
-            cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
+            // cout<< "grid:\n"<<grid->toString()<<endl;
+            // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
             setQ.insert(grid->getTile(Coord2D(0,0)));
 
             // for (Tile t: tempGrid) {
