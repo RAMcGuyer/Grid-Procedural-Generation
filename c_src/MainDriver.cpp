@@ -5,38 +5,14 @@
 #include <thread>
 #include <cassert>
 
-#include "Coord2D.hpp"
-#include "Tile.hpp"
-#include "Path.hpp"
-#include "Grid2D.hpp"
-#include "Hash.hpp"
-#include "GameGrid2D.hpp"
-
 using namespace std;
 
-void testGenerateGameGrid(int numOfGrids);
-void testDijkstra();
-void testIterator();
-void testPaths();
-void testMarkRect();
-void testMarkRow();
-void testGrid();
-void testSetOfPoints();
-
-int main(int argc, char** argv) {
-    cout << "Hello World!" << endl;
-    if(argc > 2) {
-        cout << "Too many arguments!" << endl;
-        exit(1);
-    }
-    else if(argc == 1) {
-        testGenerateGameGrid(INT_MAX);
-    }
-    else {
-        int numOfGrids = atoi(argv[1]);
-        testGenerateGameGrid(numOfGrids);
-    }
-}
+#include "Coord2D.h"
+#include "Tile.h"
+#include "Path.h"
+#include "Grid2D.h"
+#include "GameGrid2D.h"
+#include "Hash.h"
 
 void testGenerateGameGrid(int numOfGrids) {
     if(numOfGrids < 0) {
@@ -213,4 +189,19 @@ void testSetOfPoints() {
         cout << element.toString() << " ";
     }
     cout << endl;
+}
+
+int main(int argc, char** argv) {
+    cout << "Hello World!" << endl;
+    if(argc > 2) {
+        cout << "Too many arguments!" << endl;
+        exit(1);
+    }
+    else if(argc == 1) {
+        testGenerateGameGrid(INT_MAX);
+    }
+    else {
+        int numOfGrids = atoi(argv[1]);
+        testGenerateGameGrid(numOfGrids);
+    }
 }

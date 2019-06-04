@@ -1,9 +1,11 @@
-#ifndef __HASH_HPP__
-#define __HASH_HPP__
+#ifndef __HASH_H__
+#define __HASH_H__
+
 
 #include <iostream>
-#include "Tile.hpp"
-#include "Coord2D.hpp"
+
+#include "Tile.h"
+#include "Coord2D.h"
 
 struct TileHasher {
     size_t operator()(const Tile& tileObj) const {
@@ -83,5 +85,5 @@ struct Coord2DComparator {
 	}
 };
 
-#endif //__HASH_HPP__
 
+#endif //__HASH_H__
