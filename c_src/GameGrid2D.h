@@ -5,10 +5,12 @@
 #include <bits/stdc++.h>
 #include <stdlib.h>
 #include <time.h>
+#include <chrono>
 #include <set>
 #include <vector>
 
 using namespace std;
+using namespace std::chrono;
 
 #include "Path.h"
 #include "Coord2D.h"

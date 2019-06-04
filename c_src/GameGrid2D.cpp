@@ -42,10 +42,10 @@ void GameGrid2D::init(int thickness, int numLandmarks) {
     
     assert(landmarks.size() >= 2);               
     // Draw preliminary thin paths with no layers
-    cout<<"init landmarks:\n"<<endl;
-    for (auto lm:landmarks) {
-        cout<<lm.toString()<<endl;
-    }
+    //cout<<"init landmarks:\n"<<endl;
+    //for (auto lm:landmarks) {
+    //    cout<<lm.toString()<<endl;
+    //}
     vector<Path> fullPath = getFullPath(landmarks, 0);
     for (Path& p : fullPath) {
 
@@ -95,9 +95,10 @@ list<Coord2D> GameGrid2D::getDistinctRandomPoints(int amount, unordered_set<Coor
         // We use a while loop instead of a for loop
         // because there's a small chance
         // that we could accidentally generate duplicate Coord2D's
-    cout <<"getDRP before while" <<endl;
+    //cout <<"getDRP before while" <<endl;
     Coord2D randCoord;
-    srand(time(NULL));
+	milliseconds ms = duration_cast< milliseconds>(system_clock::now().time_since_epoch());
+    srand(ms.count());
     while (pointsSet.size() < amount) {
 
         randCoord = getRandomNonBase();
@@ -110,7 +111,7 @@ list<Coord2D> GameGrid2D::getDistinctRandomPoints(int amount, unordered_set<Coor
     for(auto point:pointsSet) { 
         pointsList.push_back(point);
     }
-    cout <<"getDRP after while" <<endl;
+    //cout <<"getDRP after while" <<endl;
         // As far as this function is concerned,
         // order does not matter
        // vector<Coord2D> pointsList = new vector<Coord2D>(pointsSet);
@@ -130,21 +131,21 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
     for(auto i : landmarks){
         marks.push_back(i);
     } 
-    cout <<"gFP before for"<<endl;
+    //cout <<"gFP before for"<<endl;
     for (int i = 0; i < landmarks.size() - 1; i++) {
 
         Coord2D landmark1 = marks.at(i);
         Coord2D landmark2 = marks.at(i + 1);
-        cout << "gFP before Path for i:"<<i<<endl;
+        //cout << "gFP before Path for i:"<<i<<endl;
         if(this == 0) {
             cout << "THIS IS 0"<<endl;
             exit(1);
         }
         Path p = Path(this, landmark1, landmark2, thickness);
-        cout <<"gFP after Path"<<endl;
+        //cout <<"gFP after Path"<<endl;
         paths.push_back(p);
     }
-    cout <<"gFP after for"<<endl;
+    //cout <<"gFP after for"<<endl;
     return paths;
 }
 

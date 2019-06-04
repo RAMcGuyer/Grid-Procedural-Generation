@@ -3,3 +3,5 @@ bin/
 .project
 *.class
 output_max_iterations.txt
+*.o
+procgen
