@@ -202,6 +202,9 @@ int main(int argc, char** argv) {
     }
     else {
         int numOfGrids = atoi(argv[1]);
+        auto startTime = std::chrono::steady_clock::now();
         testGenerateGameGrid(numOfGrids);
+        auto endTime = std::chrono::steady_clock::now();
+        cout << "Took " << std::chrono::duration<double,milli>(endTime-startTime).count() << "ms to generate grid(s)"<<endl;
     }
 }
