@@ -352,6 +352,16 @@ void Grid2D::markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark) {
 	}
 }
 
+// Tile* Grid2D::getTraversableNeighbors(Coord2D location) {
+// 	Tile neighbors[4] ;
+// 	if(canGoUp(location)) {
+// 		Tile* upNeighbor = getUp(location);
+// 		if(upNeighbor->getType() != Tile::TileType::NON_TRAVERSABLE) {
+// 			neighbors[0]
+// 		}
+// 	}
+// }
+
 std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> Grid2D::getTraversableNeighbors(Coord2D location) {
 	std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> neighbors;
 
