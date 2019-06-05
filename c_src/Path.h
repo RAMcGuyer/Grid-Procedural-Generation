@@ -14,13 +14,13 @@
 
 class Path {
     private:
+        //Empty for now because it was giving me issues.
+    public:
         Grid2D* grid;
         std::list<Coord2D>* joints;
         int thickness;
-
-    public:
         Path(Grid2D* grid);
-        Path(Grid2D* grid, Coord2D point1, Coord2D point2, int thickness);
+        Path(Grid2D* grid, int thickness);
         Path(Grid2D* grid, std::list<Coord2D> & joints, int thickness);
         ~Path();
 
@@ -28,7 +28,6 @@ class Path {
         bool addJoint(Coord2D newJoint);
         bool addJoint(Coord2D newJoint, int index);
         void setPathType(Tile::TileType type, bool prioritize);
-        void populateBestPath(Coord2D src, Coord2D dest);
 };
 
 

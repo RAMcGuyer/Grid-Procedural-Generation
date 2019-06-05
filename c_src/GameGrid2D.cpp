@@ -1,16 +1,115 @@
 #include "GameGrid2D.h"
 
-// GameGrid2D::GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
-//             init(thickness, landmarks);
-//         }
+void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
+    Grid2D* tempGrid = new Grid2D(*(p.grid)); // FIXME: error here?
+    Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
+    Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
+    srcTile->setDistance(0);
+    // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
 
-// GameGrid2D::GameGrid2D(const Grid2D other) : Grid2D::Grid2D(other) {
-//             init(3, 6);
-//         }
+    if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
+    if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
+        cout << "Path attempted on non-traversable srcTile" << endl;
+        exit(1);
+    }
+    if(destTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
+        cout << "Path attempted on non-traversable destTile" << endl;
+        exit(1);
+    }
 
-// GameGrid2D::~GameGrid2D(){
-//             //This is a deconstructor    
-//         }
+    unordered_set<Tile*, TilePtrHasher, TilePtrComparator> setQ;
+    // cout<< "grid:\n"<<grid->toString()<<endl;
+    // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
+    setQ.insert(p.grid->getTile(Coord2D(0,0)));
+
+    // for (Tile t: tempGrid) {
+    //     if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
+    //         setQ.insert(t);
+    //     }
+    // }
+    // iterate through tiles in grid
+    for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
+        for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
+            Tile* tempTile = tempGrid->grid->at(i).at(j);
+            if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
+                // cout<<"INSERTING TILE:\n"<<tempTile->toString()<<endl;
+                setQ.insert(tempTile);
+            }
+        }
+    }
+
+    if(setQ.find(srcTile) == setQ.end()) {
+        cout << "setQ doesn't contain srcTile" << endl;
+        exit(1);
+    }
+    if(setQ.find(destTile) == setQ.end()) {
+        cout << "setQ doesn't contain destTile" << endl;
+    } //Line 155
+
+    Tile* uTile = NULL;
+    // FIXME: setQ's tile distances are not set
+    while(!setQ.empty()) {
+        int runningMin = INT_MAX;
+
+        // here the first tile's distance should be 0
+        for (Tile* t : setQ) {
+            if(t->getDistance() < runningMin) {
+                // cout<<"TEST"<<endl;
+                runningMin = t->getDistance();
+                uTile = t;
+            }
+        }
+
+        if(uTile == NULL) {
+            cout << "Minimum distance tile uTile not properly set" << endl;
+            exit(1);
+        }
+        if(setQ.find(uTile) == setQ.end()) {
+            cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
+            exit(1);
+        }
+        setQ.erase(uTile);
+
+        if(uTile == destTile) { 
+            break;
+        }
+
+        unordered_set<Tile*, TilePtrHasher, TilePtrComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
+
+        for (Tile* thisNeighbor : uNeighbors) {
+            int currentDist = uTile->getDistance() + 1;
+            if (currentDist < thisNeighbor->getDistance()) {
+                thisNeighbor->setDistance(currentDist);
+                thisNeighbor->setPreviousTile(uTile);
+            }
+        }
+    }
+
+    if (uTile->getPreviousTile() == NULL && uTile != srcTile) {
+        cout << "Condition specified by Dijkstra's not met" << endl;
+        exit(1);
+    }
+
+    while(uTile != NULL) {
+        p.joints->push_back(*uTile->getLocation());
+        uTile = uTile->getPreviousTile();
+
+        if (uTile == NULL && p.joints->size() < 2) {
+            cout << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
+            "dest: " << dest.toString() << "\n" <<
+            "src.equals(dest)? " << src.equals(dest);
+
+            exit(1);
+        }
+    }
+    // delete tempGrid
+    for(unsigned i = 0; i < tempGrid->grid->size();++i) {
+        for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
+            delete tempGrid->grid->at(i).at(j);
+        }
+    }
+    delete tempGrid->grid;
+} //End populateBestPath
 
 void GameGrid2D::drawBases() {
     int gridX = getGridDimensions().getX();
@@ -142,7 +241,8 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
             cout << "THIS IS 0"<<endl;
             exit(1);
         }
-        Path p = Path(this, landmark1, landmark2, thickness);
+        Path p = Path(this, thickness);
+        populateBestPath(p, landmark1, landmark2);
         //cout <<"gFP after Path"<<endl;
         paths.push_back(p);
     }
