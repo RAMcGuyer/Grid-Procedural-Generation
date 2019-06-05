@@ -1,7 +1,7 @@
 #include "GameGrid2D.h"
 
 void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
-    Grid2D* tempGrid = new Grid2D(*(p.grid)); // FIXME: error here?
+    Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
     Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
     Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
     srcTile->setDistance(0);

@@ -10,8 +10,8 @@ Path::Path(Grid2D* grid) {
 
 Path::Path(Grid2D* grid, int thickness) {
     if(this == 0) {
-    cout << "THIS IS 0"<<endl;
-    exit(1);
+    	cout << "THIS IS 0"<<endl;
+    	exit(1);
     }
     this->grid=grid;
     this->joints= new list<Coord2D>();
