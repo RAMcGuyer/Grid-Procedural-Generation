@@ -37,9 +37,10 @@ class GameGrid2D : public Grid2D {
 
     	void drawBases();
     	void init(int thickness, int numLandmarks);
-    	std::list<Coord2D> getDistinctRandomPoints(int amount, std::unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet);	
+    	std::list<Coord2D> getDistinctRandomPoints(unsigned int amount, std::unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet);	
     	std::vector<Path> getFullPath(std::list<Coord2D> landmarks, int thickness);
     	Coord2D getRandomNonBase(); 
+        void populateBestPath(Path p, Coord2D src, Coord2D dest);
 };    
 
 

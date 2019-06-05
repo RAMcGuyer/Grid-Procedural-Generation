@@ -1,5 +1,5 @@
 CC		:= g++
-CXXFLAGS:= -std=c++11
+CXXFLAGS:= -std=c++11 -Wall -Wno-nonnull-compare 
 LDFLAGS := 
 
 TARGETS := procgen
@@ -19,3 +19,4 @@ $(OBJ): %.o : %.cpp $(DEPS)
 
 $(TARGETS): $(OBJ)
 	$(CC) -o $@ $(LIBS)$^ $(CXXFLAGS) $(LDFLAGS)
+	rm -f $(OBJ)
