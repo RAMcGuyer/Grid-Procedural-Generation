@@ -86,7 +86,7 @@ void GameGrid2D::init(int thickness, int numLandmarks) {
  * @param amount Number of random points to generate
  * @return List of distinct Coord2D objects
  */
-list<Coord2D> GameGrid2D::getDistinctRandomPoints(int amount, unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet) {
+list<Coord2D> GameGrid2D::getDistinctRandomPoints(unsigned int amount, unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet) {
 
     // unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
     list<Coord2D> pointsList;
@@ -132,7 +132,8 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
         marks.push_back(i);
     } 
     //cout <<"gFP before for"<<endl;
-    for (int i = 0; i < landmarks.size() - 1; i++) {
+    unsigned int one = 1;	// done to surpress warning from -Wall compiler flag
+    for (unsigned int i = 0; i < landmarks.size() - one; i++) {
 
         Coord2D landmark1 = marks.at(i);
         Coord2D landmark2 = marks.at(i + 1);
