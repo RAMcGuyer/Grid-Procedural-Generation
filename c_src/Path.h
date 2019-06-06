@@ -25,6 +25,7 @@ class Path {
         Path(Grid2D* grid);
         Path(Grid2D* grid, Coord2D src, Coord2D dst, int thickness);
         Path(Grid2D* grid, std::list<Coord2D> & joints, int thickness);
+		Path(const Path& other);
         ~Path();
 
         bool areCompatibleJoints(Coord2D joint1, Coord2D joint2);
