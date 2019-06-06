@@ -113,8 +113,8 @@ void GameGrid2D::populateBestPath(Path& p) {
 } //End populateBestPath
 
 void GameGrid2D::drawBases() {
-    int gridX = getGridDimensions().getX();
-    int gridY = getGridDimensions().getY();
+    int gridX = getGridDimensions()->getX();
+    int gridY = getGridDimensions()->getY();
     
     Coord2D p1LowLeft = Coord2D(0, 0);
     this->p1UpRight = Coord2D(p1LowLeft.getX() + BASE_WIDTH,
@@ -253,8 +253,8 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
 
 Coord2D GameGrid2D::getRandomNonBase() {
 
-    int xGridBound = this->Grid2D::getGridDimensions().getX();
-    int yGridBound = this->Grid2D::getGridDimensions().getY();
+    int xGridBound = this->Grid2D::getGridDimensions()->getX();
+    int yGridBound = this->Grid2D::getGridDimensions()->getY();
 
     int x, y;
 

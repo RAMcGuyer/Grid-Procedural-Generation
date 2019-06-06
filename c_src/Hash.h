@@ -68,16 +68,16 @@ struct TilePtrComparator {
 };
 
 struct Coord2DHasher {
-	size_t operator()(const Coord2D& coord2D) const {
-		return std::hash<int>()(coord2D.hashCode());
+	size_t operator()(const Coord2D* coord2D) const {
+		return std::hash<int>()(coord2D->hashCode());
 	}
 };
 
 struct Coord2DComparator {
-	bool operator()(const Coord2D& obj1, const Coord2D& obj2) const {
+	bool operator()(const Coord2D* obj1, const Coord2D* obj2) const {
 		if(
-			obj1.getX() == obj2.getX()
-			&& obj1.getY() == obj2.getY()
+			obj1->getX() == obj2->getX()
+			&& obj1->getY() == obj2->getY()
 		) {
 			return true;
 		}

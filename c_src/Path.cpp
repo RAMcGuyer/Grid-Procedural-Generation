@@ -4,7 +4,7 @@ using namespace std;
 
 Path::Path(Grid2D* grid) {
     this->grid=grid;
-    this->joints=new list<Coord2D>();
+    this->joints=new list<Coord2D*>();
     this->thickness=0;
 }
 
@@ -16,29 +16,28 @@ Path::Path(Grid2D* grid, Coord2D src, Coord2D dst, int thickness) {
     this->grid=grid;
     this->src = src;
     this->dst = dst;
-    this->joints= new list<Coord2D>();
+    this->joints= new list<Coord2D*>();
     this->thickness=thickness;
 
 }
 
-Path::Path(Grid2D* grid, list<Coord2D> & joints, int thickness) { // FIXME: how are joints passed? make new in constructor?
+Path::Path(Grid2D* grid, list<Coord2D*> & joints, int thickness) { // FIXME: how are joints passed? make new in constructor?
     this->grid=grid;
-    this->joints = new list<Coord2D>(joints);
-    //this->joints = std::list<Coord2D>(joints);
+    this->joints = new list<Coord2D*>(joints);
     this->thickness=thickness;
 }
 
 Path::~Path() {
     //for (unsigned int i = 0; i < joints->size(); i++)
 	//	delete joints[i];
-	//delete joints;
+	delete joints;
 }
 
-bool Path::areCompatibleJoints(Coord2D joint1, Coord2D joint2) {
-    return joint1.getX() == joint2.getX() || joint1.getY() == joint2.getY();
+bool Path::areCompatibleJoints(Coord2D* joint1, Coord2D* joint2) {
+    return joint1->getX() == joint2->getX() || joint1->getY() == joint2->getY();
 }
 
-bool Path::addJoint(Coord2D newJoint) {
+bool Path::addJoint(Coord2D* newJoint) {
     if (joints->empty()) {
         joints->push_back(newJoint);
         return true;
@@ -48,7 +47,7 @@ bool Path::addJoint(Coord2D newJoint) {
     }
 }
 
-bool Path::addJoint(Coord2D newJoint, int index) {
+bool Path::addJoint(Coord2D* newJoint, int index) {
     // range check index
     // passing this check means index is: 0 <= index <= joints->size()
     if(index < 0 || (unsigned)index > joints->size()) {
@@ -68,7 +67,7 @@ bool Path::addJoint(Coord2D newJoint, int index) {
     if(it != joints->begin()) { 
         // if we made it here, we know joints[index] is not joints->begin(),
         // so it has a previous neighbor -> now we check compatibility
-        Coord2D left_neighbor = *(prevIt);
+        Coord2D* left_neighbor = *(prevIt);
         if(!areCompatibleJoints(left_neighbor, newJoint)) {
             it = joints->erase(it);
             return false;
@@ -85,7 +84,7 @@ bool Path::addJoint(Coord2D newJoint, int index) {
     if(it != joints->end() && nextIt != joints->end()) {
         // if we made it here, we know joints[index] has next neighbor 
         // so we can check compatibility
-        Coord2D right_neighbor = *(nextIt);
+        Coord2D* right_neighbor = *(nextIt);
         if(!areCompatibleJoints(newJoint, right_neighbor)) {
             it = joints->erase(it);
             return false;
@@ -99,10 +98,10 @@ void Path::setPathType(Tile::TileType type, bool prioritize) {
         cout << "Not enough joints in path" <<endl;
         exit(1);
     }
-    Coord2D firstJoint = joints->front();
-    list<Coord2D>::iterator it = joints->begin();
+    Coord2D* firstJoint = joints->front();
+    list<Coord2D*>::iterator it = joints->begin();
     for(;it != joints->end();++it) {
-        Coord2D secondJoint = *it;
+        Coord2D* secondJoint = *it;
         grid->setTypeLine(firstJoint, secondJoint, type, thickness, prioritize);
         firstJoint = secondJoint; // FIXME: possible error - does this do the same thing as in java?
     }

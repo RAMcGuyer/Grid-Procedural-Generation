@@ -11,9 +11,9 @@ Coord2D::Coord2D(int x, int y) {
     this->y = y;
 }
 // Constructor that creates a deep copy of a coordinate object
-Coord2D::Coord2D(const Coord2D& other) {
-    this->x = other.x;
-    this->y = other.y;
+Coord2D::Coord2D(const Coord2D* other) {
+    this->x = other->x;
+    this->y = other->y;
 }
 
 Coord2D::~Coord2D(){

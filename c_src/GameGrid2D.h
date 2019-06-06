@@ -19,7 +19,7 @@ using namespace std::chrono;
 
 class GameGrid2D : public Grid2D {
     public:
-        GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
+        GameGrid2D(Coord2D* dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
             init(thickness, landmarks);
         }
 
