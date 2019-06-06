@@ -19,8 +19,10 @@ class Path {
         Grid2D* grid;
         std::list<Coord2D>* joints;
         int thickness;
+        Coord2D src;
+        Coord2D dst;
         Path(Grid2D* grid);
-        Path(Grid2D* grid, int thickness);
+        Path(Grid2D* grid, Coord2D src, Coord2D dst, int thickness);
         Path(Grid2D* grid, std::list<Coord2D> & joints, int thickness);
         ~Path();
 

@@ -1,13 +1,13 @@
 #include "GameGrid2D.h"
 
-void GameGrid2D::populateBestPath(Path& p, Coord2D src, Coord2D dest) {
+void GameGrid2D::populateBestPath(Path& p) {
     Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
-    Tile* srcTile = tempGrid->getTile(src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
-    Tile* destTile = tempGrid->getTile(dest); // on insert/delete, but since we don't modify tempGrid, this should be fine
+    Tile* srcTile = tempGrid->getTile(p.src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
+    Tile* destTile = tempGrid->getTile(p.dst); // on insert/delete, but since we don't modify tempGrid, this should be fine
     srcTile->setDistance(0);
     // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
 
-    if(src == dest) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
+    if(p.src == p.dst) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
     if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
         cout << "Path attempted on non-traversable srcTile" << endl;
         exit(1);
@@ -95,9 +95,9 @@ void GameGrid2D::populateBestPath(Path& p, Coord2D src, Coord2D dest) {
         uTile = uTile->getPreviousTile();
 
         if (uTile == NULL && p.joints->size() < 2) {
-            cout << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
-            "dest: " << dest.toString() << "\n" <<
-            "src.equals(dest)? " << src.equals(dest);
+            cout << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << p.src.toString() << "\n" <<
+            "dest: " << p.dst.toString() << "\n" <<
+            "src.equals(dest)? " << p.src.equals(p.dst);
 
             exit(1);
         }
@@ -241,8 +241,8 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
             cout << "THIS IS 0"<<endl;
             exit(1);
         }
-        Path p = Path(this, thickness);
-        populateBestPath(p, landmark1, landmark2);
+        Path p = Path(this, landmark1, landmark2, thickness);
+        populateBestPath(p);
         //cout <<"gFP after Path"<<endl;
         paths.push_back(p);
     }
