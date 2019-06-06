@@ -20,7 +20,7 @@ void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
     unordered_set<Tile*, TilePtrHasher, TilePtrComparator> setQ;
     // cout<< "grid:\n"<<grid->toString()<<endl;
     // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
-    setQ.insert(p.grid->getTile(Coord2D(0,0)));
+    setQ.insert(p.grid->getTile(0, 0));
 
     // for (Tile t: tempGrid) {
     //     if(t.getType() != Tile::TileType::NON_TRAVERSABLE) {
@@ -30,8 +30,9 @@ void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
     // iterate through tiles in grid
     for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
         for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-            Tile* tempTile = tempGrid->grid->at(i).at(j);
-            if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
+            //Tile* tempTile = tempGrid->grid->at(i).at(j);
+            Tile* tempTile = tempGrid->getTile(i, j);
+			if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
                 // cout<<"INSERTING TILE:\n"<<tempTile->toString()<<endl;
                 setQ.insert(tempTile);
             }
@@ -46,7 +47,7 @@ void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
         cout << "setQ doesn't contain destTile" << endl;
     } //Line 155
 
-    Tile* uTile = NULL;
+    Tile* uTile = nullptr;
     // FIXME: setQ's tile distances are not set
     while(!setQ.empty()) {
         int runningMin = INT_MAX;
@@ -95,7 +96,7 @@ void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
         uTile = uTile->getPreviousTile();
 
         if (uTile == NULL && p.joints->size() < 2) {
-            cout << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
+            cerr << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << src.toString() << "\n" <<
             "dest: " << dest.toString() << "\n" <<
             "src.equals(dest)? " << src.equals(dest);
 
@@ -103,12 +104,12 @@ void GameGrid2D::populateBestPath(Path p, Coord2D src, Coord2D dest) {
         }
     }
     // delete tempGrid
-    for(unsigned i = 0; i < tempGrid->grid->size();++i) {
+    /*for(unsigned i = 0; i < tempGrid->grid->size();++i) {
         for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
             delete tempGrid->grid->at(i).at(j);
         }
-    }
-    delete tempGrid->grid;
+    }*/
+    delete tempGrid;
 } //End populateBestPath
 
 void GameGrid2D::drawBases() {

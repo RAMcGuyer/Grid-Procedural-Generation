@@ -27,6 +27,7 @@ class Grid2D {
 		std::string toString();
 		void setTile(Tile::TileType t, Coord2D location);
 		Tile* getTile(Coord2D location) const;
+	    Tile* getTile(int x, int y) const;
 		void assertBounds(Coord2D location) const;
 		bool checkBounds(Coord2D location) const;
 		Coord2D getGridDimensions();

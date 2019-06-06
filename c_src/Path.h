@@ -17,8 +17,9 @@ class Path {
         //Empty for now because it was giving me issues.
     public:
         Grid2D* grid;
+        //std::list<Coord2D *> * joints;
         std::list<Coord2D>* joints;
-        int thickness;
+		int thickness;
         Path(Grid2D* grid);
         Path(Grid2D* grid, int thickness);
         Path(Grid2D* grid, std::list<Coord2D> & joints, int thickness);
