@@ -17,7 +17,7 @@ void GameGrid2D::populateBestPath(Path& p) {
         exit(1);
     }
 
-    unordered_set<Tile*, TilePtrHasher, TilePtrComparator> setQ;
+    std::set<Tile*> setQ;
     // cout<< "grid:\n"<<grid->toString()<<endl;
     // cout<<"INSERTING TILE:\n"<<(*grid->getTile(Coord2D(0,0))).toString()<<endl;
     setQ.insert(p.grid->getTile(0, 0));
@@ -75,7 +75,7 @@ void GameGrid2D::populateBestPath(Path& p) {
             break;
         }
 
-        unordered_set<Tile*, TilePtrHasher, TilePtrComparator> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
+        set<Tile*> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
 
         for (Tile* thisNeighbor : uNeighbors) {
             int currentDist = uTile->getDistance() + 1;
@@ -95,10 +95,12 @@ void GameGrid2D::populateBestPath(Path& p) {
         p.joints->push_back(*uTile->getLocation());
         uTile = uTile->getPreviousTile();
 
+        bool arePointsSame = (p.src == p.dst);
+
         if (uTile == NULL && p.joints->size() < 2) {
-            cerr << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << p.src.toString() << "\n" <<
-            "dest: " << p.dst.toString() << "\n" <<
-            "src.equals(dest)? " << p.src.equals(p.dst);
+            cerr << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << coord_to_string(p.src) << "\n" <<
+            "dest: " << coord_to_string(p.dst) << "\n" <<
+            "src.equals(dest)? " << arePointsSame;
 
             exit(1);
         }
@@ -113,15 +115,15 @@ void GameGrid2D::populateBestPath(Path& p) {
 } //End populateBestPath
 
 void GameGrid2D::drawBases() {
-    int gridX = getGridDimensions().getX();
-    int gridY = getGridDimensions().getY();
+    int gridX = getGridDimensions().first;
+    int gridY = getGridDimensions().second;
     
     Coord2D p1LowLeft = Coord2D(0, 0);
-    this->p1UpRight = Coord2D(p1LowLeft.getX() + BASE_WIDTH,
-        p1LowLeft.getY() + BASE_WIDTH);
+    this->p1UpRight = Coord2D(p1LowLeft.first + BASE_WIDTH,
+        p1LowLeft.second + BASE_WIDTH);
     Coord2D p2UpRight = Coord2D(gridX - 1, gridY - 1);
-    this->p2LowLeft = Coord2D(p2UpRight.getX() - BASE_WIDTH + 1,
-        p2UpRight.getY() - BASE_WIDTH + 1);
+    this->p2LowLeft = Coord2D(p2UpRight.first - BASE_WIDTH + 1,
+        p2UpRight.second - BASE_WIDTH + 1);
     
     setTypeRect(p1LowLeft, p1UpRight, Tile::TileType::TRAVERSABLE, true);
     setTypeRect(p2LowLeft, p2UpRight, Tile::TileType::TRAVERSABLE, true);
@@ -135,7 +137,7 @@ void GameGrid2D::init(int thickness, int numLandmarks) {
     
     // Also initializes p1UpRight and p2LowLeft
     drawBases();
-    unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
+    set<Coord2D> pointsSet;
     list<Coord2D> landmarks = getDistinctRandomPoints(numLandmarks, pointsSet);
     landmarks.push_front(p1UpRight);
     landmarks.push_back(p2LowLeft);
@@ -186,8 +188,8 @@ void GameGrid2D::init(int thickness, int numLandmarks) {
  * @param amount Number of random points to generate
  * @return List of distinct Coord2D objects
  */
-list<Coord2D> GameGrid2D::getDistinctRandomPoints(unsigned int amount, unordered_set<Coord2D,Coord2DHasher,Coord2DComparator>&pointsSet) {
-
+std::list<Coord2D> GameGrid2D::getDistinctRandomPoints(unsigned int amount, std::set<Coord2D>&pointsSet)
+{
     // unordered_set<Coord2D, Coord2DHasher, Coord2DComparator> pointsSet;
     list<Coord2D> pointsList;
         // Use the same Random object to ensure correct output
@@ -205,7 +207,7 @@ list<Coord2D> GameGrid2D::getDistinctRandomPoints(unsigned int amount, unordered
 
             // These two will populate pointsSet later,
             // so check for duplicates now
-        if (!randCoord.equals(p1UpRight) && !randCoord.equals(p2LowLeft))
+        if ((randCoord != p1UpRight) && (randCoord != p2LowLeft))
             pointsSet.insert(randCoord);
     }
     for(auto point:pointsSet) { 
@@ -253,24 +255,24 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
 
 Coord2D GameGrid2D::getRandomNonBase() {
 
-    int xGridBound = this->Grid2D::getGridDimensions().getX();
-    int yGridBound = this->Grid2D::getGridDimensions().getY();
+    int xGridBound = this->Grid2D::getGridDimensions().first;
+    int yGridBound = this->Grid2D::getGridDimensions().second;
 
     int x, y;
 
     x = rand() % xGridBound;
 
         // if x is within range of base1, y needs to dodge base1
-    if (x <= p1UpRight.getX()) {
+    if (x <= p1UpRight.first) {
 
-        y = rand() % (yGridBound - p1UpRight.getY());
-        y += p1UpRight.getY();
+        y = rand() % (yGridBound - p1UpRight.second);
+        y += p1UpRight.second;
     }
 
         // else if x is within range of base2, y needs to dodge base2
-    else if (p2LowLeft.getX() <= x) {
+    else if (p2LowLeft.first <= x) {
 
-            y = rand() % (p2LowLeft.getY()); // exclusive
+            y = rand() % (p2LowLeft.second); // exclusive
     }
     
     // Else, y doesn't need to dodge anything

@@ -2,42 +2,14 @@
 #define __COORD2D_H__
 
 
-#include <stdlib.h> 
+#include <iostream>
 #include <string>
-#include <typeinfo>
+#include <utility>
 
-class Coord2D {
-//Coord2D is a coordinate object that enables us to keep track of
-// which tiles in our grid our landmarks.
-    private: 
-        int x;
-        int y;
+#define Coord2D std::pair<int, int>
 
-    public:
-        Coord2D();
-        Coord2D(int x, int y);
-        Coord2D(const Coord2D& other);
-        ~Coord2D();
-        int getX() const;
-        int getY() const;
-        std::string toString();
-        int hashCode() const;
-        void operator=(const Coord2D& rhs);
-        bool operator==(const Coord2D& rhs);
+//std::ostream& printCoord2D(std::ostream& out, const Coord2D& printMe);
+std::ostream& operator <<(std::ostream& out, const Coord2D& printMe);
+std::string coord_to_string(const Coord2D& printMe);
 
-        //Comparator function   
-        template <class T>
-        bool equals(T other) {    
-            //return this.x == other.x && this.y == other.y;
-            if ( (typeid(other)==typeid(Coord2D)) ) {
-                Coord2D otherCoord = (Coord2D) other;
-                return this->x == otherCoord.x && this->y == otherCoord.y;
-            }
-            else{ 
-                return false;
-            }
-        }  
-};
-
-
-#endif //__COORD2D_H__
+#endif // __COORD2D_H__

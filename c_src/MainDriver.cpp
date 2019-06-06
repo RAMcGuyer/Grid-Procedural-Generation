@@ -1,5 +1,4 @@
 #include <iostream>
-#include <unordered_set>
 #include <set>
 #include <chrono>
 #include <thread>
@@ -12,7 +11,7 @@ using namespace std;
 #include "Path.h"
 #include "Grid2D.h"
 #include "GameGrid2D.h"
-#include "Hash.h"
+//#include "Hash.h"
 
 void testGenerateGameGrid(int numOfGrids) {
     if(numOfGrids < 0) {
@@ -36,26 +35,28 @@ void testGenerateGameGrid(int numOfGrids) {
 }
 
 
-void testIterator() {
-    Coord2D gridDimensions = Coord2D(50,50);
-    Grid2D grid2D = Grid2D(gridDimensions);
+//NOTE: note using iterators in the c++ imp
 
-    unordered_set<Tile,TileHasher,TileComparator> tiles;
-    tiles.insert(*grid2D.getTile(Coord2D(0,0)));
-    // for (Tile t : grid) {
-    //     tiles.insert(t);
-    // }
+// void testIterator() {
+//     Coord2D gridDimensions = Coord2D(50,50);
+//     Grid2D grid2D = Grid2D(gridDimensions);
 
-    for(unsigned int i = 0; i < grid2D.grid->size(); ++i) {
-        for(unsigned j = 0; j < grid2D.grid->at(i).size();++j) {
-            Tile* tempTile = grid2D.grid->at(i).at(j);
-            tiles.insert(*tempTile);
-        }
-    }
+//     set<Tile> tiles;
+//     tiles.insert(*grid2D.getTile(Coord2D(0,0)));
+//     // for (Tile t : grid) {
+//     //     tiles.insert(t);
+//     // }
 
-    cout << "Expected size: " << gridDimensions.getX()*gridDimensions.getY() << endl;
-    cout << "Num of tiles: " << tiles.size() << endl;
-}
+//     for(unsigned int i = 0; i < grid2D.grid->size(); ++i) {
+//         for(unsigned j = 0; j < grid2D.grid->at(i).size();++j) {
+//             Tile* tempTile = grid2D.grid->at(i).at(j);
+//             tiles.insert(*tempTile);
+//         }
+//     }
+
+//     cout << "Expected size: " << gridDimensions.first*gridDimensions.second << endl;
+//     cout << "Num of tiles: " << tiles.size() << endl;
+// }
 
 void testPaths() {
     Grid2D grid = Grid2D(Coord2D(50,50));
@@ -83,7 +84,7 @@ void testMarkRect() {
     cout << "Empty grid:\n" << grid.toString() << endl;
 
     Coord2D middleBand_lowLeft = Coord2D(0,3);
-    Coord2D middleBand_upRight = Coord2D(gridDimensions.getX()-1, 6);
+    Coord2D middleBand_upRight = Coord2D(gridDimensions.first-1, 6);
 
     cout << "Marking a band in the middle:" <<endl;
     grid.markRect(middleBand_lowLeft, middleBand_upRight, true);
@@ -98,14 +99,14 @@ void testMarkRow() {
     cout << "Empty grid:\n" << grid.toString() <<endl;
 
     Coord2D lowbar_left = Coord2D(0,2);
-    Coord2D lowbar_right = Coord2D(gridDimensions.getX()-1, lowbar_left.getY());
+    Coord2D lowbar_right = Coord2D(gridDimensions.first-1, lowbar_left.second);
 
     cout << "Marking lower bar..." <<endl;
     grid.setTypeLine(lowbar_left, lowbar_right, Tile::TileType::TRAVERSABLE, 0,true);
     cout << grid.toString() <<endl;
 
     Coord2D vertbar_down = Coord2D(2,0);
-    Coord2D vertbar_up = Coord2D(vertbar_down.getX(), gridDimensions.getY()-1);
+    Coord2D vertbar_up = Coord2D(vertbar_down.first, gridDimensions.second-1);
 
     cout << "Marking vert bar..." << endl;
     grid.setTypeLine(vertbar_down, vertbar_up, Tile::TileType::TRAVERSABLE,2,true);
@@ -114,16 +115,16 @@ void testMarkRow() {
 
 void testGrid() {
     Coord2D gridDimensions = Coord2D(7,13);
-    Coord2D testPoint = Coord2D(0,gridDimensions.getY()-1);
+    Coord2D testPoint = Coord2D(0,gridDimensions.second-1);
     Coord2D emptyPoint = Coord2D(3,10);
-    Coord2D failPoint = Coord2D(7,14);
+    //Coord2D failPoint = Coord2D(7,14);
 
     Grid2D grid = Grid2D(gridDimensions);
     grid.setTile(Tile::TileType::TRAVERSABLE, testPoint);
 
     cout << grid.toString() << endl;
-    cout << "Tile at " << testPoint.toString() << ": " << grid.getTile(testPoint) << endl;
-    cout << "Tile at " << emptyPoint.toString() << ": " << grid.getTile(emptyPoint) << endl;
+    cout << "Tile at " << testPoint << ": " << grid.getTile(testPoint) << endl;
+    cout << "Tile at " << emptyPoint << ": " << grid.getTile(emptyPoint) << endl;
 
     cout << "Can testPoint go up? " << (grid.canGoUp(testPoint) ? "true" : "false") << endl;
     cout << "Can testPoint go down? " << (grid.canGoDown(testPoint) ? "true" : "false") << endl;
@@ -142,27 +143,27 @@ void testSetOfPoints() {
     Coord2D anotherone = Coord2D(6,9);
 
     assert(&original != &duplicate);
-    assert(duplicate.equals(original));
+    assert(duplicate == original);
 
-    // unordered_set<Coord2D,Coord2DHasher,Coord2DComparator> set = unordered_set<Coord2D>(3);
-    unordered_set<Coord2D,Coord2DHasher,Coord2DComparator> set;
-    set.insert(original);
-    cout << "Set contains original. Contains duplicate? " << ((set.find(duplicate) == set.end()) ? "true":"false") << endl;
-    set.insert(duplicate);
-    set.insert(anotherone);
+    // set<Coord2D,Coord2DHasher,Coord2DComparator> set = set<Coord2D>(3);
+    set<Coord2D> coordSet;
+    coordSet.insert(original);
+    cout << "Set contains original. Contains duplicate? " << ((coordSet.find(duplicate) == coordSet.end()) ? "true":"false") << endl;
+    coordSet.insert(duplicate);
+    coordSet.insert(anotherone);
 
     list<Coord2D> list;
-    for (Coord2D element : set) {
+    for (Coord2D element : coordSet) {
         list.push_back(element);
     }
     cout << "Set: ";
-    for (Coord2D element : set) {
-        cout << element.toString() << " ";
+    for (Coord2D element : coordSet) {
+        cout << element << " ";
     }
     cout << endl;
     cout << "List: ";
     for (Coord2D element : list) {
-        cout << element.toString() << " ";
+        cout << element << " ";
     }
     cout << endl;
 }

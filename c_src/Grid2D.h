@@ -4,7 +4,7 @@
 
 #include <cassert>
 #include <string>
-#include <unordered_set>
+#include <set>
 #include <vector>
 #include <iostream>
 
@@ -12,7 +12,7 @@ using namespace std;
 
 #include "Tile.h"
 #include "Coord2D.h"
-#include "Hash.h"
+//#include "Hash.h"
 
 class Grid2D {
 	public:
@@ -46,7 +46,7 @@ class Grid2D {
 		void setTypeRect(Coord2D lowerLeft, Coord2D upperRight, Tile::TileType type, bool prioritize);
 		void setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, int layers, bool prioritize);
 		void markRect(Coord2D lowerLeft, Coord2D upperRight, bool mark);
-		std::unordered_set<Tile*, TilePtrHasher, TilePtrComparator> getTraversableNeighbors(Coord2D location);
+		std::set<Tile*> getTraversableNeighbors(Coord2D location);
 
 	private:	
 		int ROWS;

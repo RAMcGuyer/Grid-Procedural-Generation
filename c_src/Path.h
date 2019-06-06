@@ -10,7 +10,7 @@
 
 #include "Grid2D.h"
 #include "Tile.h"
-#include "Hash.h"
+//#include "Hash.h"
 
 class Path {
     private:

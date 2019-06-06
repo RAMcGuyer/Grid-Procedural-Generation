@@ -91,7 +91,7 @@ string Tile::toString() const {
     // info.append("TileType ").append(typestr).append(", ").append(marked ? "":"not ").append(
     //     "marked, distance = ").append(distance).append(", location ").append(location.toString()); // does location have a custom toString defined?
     // return info;
-    return "TileType " + typestr + ", " + (marked ? "": "not ") + "marked, distance = " + std::to_string(distance) + ", location " + (location?location->toString():"NULL");
+    return "TileType " + typestr + ", " + (marked ? "": "not ") + "marked, distance = " + std::to_string(distance) + ", location " + (location ? coord_to_string(*location) : "NULL");
 }
 
 void Tile::setDistance(int distance) {   

@@ -35,7 +35,7 @@ Path::~Path() {
 }
 
 bool Path::areCompatibleJoints(Coord2D joint1, Coord2D joint2) {
-    return joint1.getX() == joint2.getX() || joint1.getY() == joint2.getY();
+    return joint1.first == joint2.first || joint1.second == joint2.second;
 }
 
 bool Path::addJoint(Coord2D newJoint) {
