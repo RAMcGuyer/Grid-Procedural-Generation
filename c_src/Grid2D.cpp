@@ -53,11 +53,12 @@ Grid2D::Grid2D(Grid2D* other) {
 
 Grid2D::~Grid2D() {
     //delete grid;
-    for(unsigned i = 0; i<grid->size(); ++i) {
-        for(unsigned j = 0; j < grid->at(i).size();++j) {
+    for(unsigned i = 0; i < grid->size(); i++) {
+        for(unsigned j = 0; j < grid->at(i).size(); j++) {
             delete grid->at(i).at(j);
         }
     }
+	delete grid;
 }
 
 std::string Grid2D::toString() {
@@ -105,6 +106,12 @@ void Grid2D::setTile(Tile::TileType t, Coord2D location) {
 	assertBounds(location);
 
 	(*grid)[location.getY()][location.getX()] = new Tile(t, Coord2D(location)); // FIXME: dont forget to delete
+}
+
+Tile* Grid2D::getTile(int x, int y) const {
+
+	Coord2D temp(x, y);
+    return getTile(temp);
 }
 
 Tile* Grid2D::getTile(Coord2D location) const {

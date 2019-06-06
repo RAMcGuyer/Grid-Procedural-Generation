@@ -8,12 +8,14 @@ Path::Path(Grid2D* grid) {
     this->thickness=0;
 }
 
-Path::Path(Grid2D* grid, int thickness) {
+Path::Path(Grid2D* grid, Coord2D src, Coord2D dst, int thickness) {
     if(this == 0) {
     	cout << "THIS IS 0"<<endl;
     	exit(1);
     }
     this->grid=grid;
+    this->src = src;
+    this->dst = dst;
     this->joints= new list<Coord2D>();
     this->thickness=thickness;
 
@@ -22,12 +24,14 @@ Path::Path(Grid2D* grid, int thickness) {
 Path::Path(Grid2D* grid, list<Coord2D> & joints, int thickness) { // FIXME: how are joints passed? make new in constructor?
     this->grid=grid;
     this->joints = new list<Coord2D>(joints);
+    //this->joints = std::list<Coord2D>(joints);
     this->thickness=thickness;
 }
 
 Path::~Path() {
-    // anything here?
-    // for sure dont delete joints
+    //for (unsigned int i = 0; i < joints->size(); i++)
+	//	delete joints[i];
+	//delete joints;
 }
 
 bool Path::areCompatibleJoints(Coord2D joint1, Coord2D joint2) {
