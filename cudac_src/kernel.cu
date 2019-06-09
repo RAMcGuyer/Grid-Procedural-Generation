@@ -1,4 +1,6 @@
 // source: https://github.com/sunnlo/BellmanFord/blob/master/cuda_bellman_ford.cu
+#include <stdio.h>
+
 
 __global__ void bellman_ford_kernel(int n, int* d_edges, int* d_distances, bool* next) {
     unsigned INF = 1000000;
