@@ -1,5 +1,11 @@
+#ifndef __TEST__    
+#define __TEST__
+
 #include "GameGrid2D.h"
 #include "kernel.cu"
+#include "support.h"
+
+extern void bellman_ford(int,int,int,int*,int*);
 
 void GameGrid2D::populateBestPath(Path& p) {
     Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
@@ -39,8 +45,7 @@ void GameGrid2D::populateBestPath(Path& p) {
         cout << "setQ doesn't contain destTile" << endl;
     } //Line 155
 
-    Tile* uTile = nullptr;
-
+    // Tile* uTile = nullptr;
 
     //setQ holds all traversable tiles
     int threadsPerBlock;    
@@ -51,32 +56,46 @@ void GameGrid2D::populateBestPath(Path& p) {
     int distances[numVertices];
 
     threadsPerBlock = 256; // each thread handles an edge
-    blocksPerGrid = ceil(float(n)/threadsPerBlock);
+    blocksPerGrid = ceil(float(numVertices)/threadsPerBlock);
 
     // Populate the edges matrix
     // initialize edge values using iterator
-    for(int* it = &edges[0][0]; it != &edges[0][0] + numVertices*numVertices; ++it) {
+    for(int* it = &edgesMat[0][0]; it != &edgesMat[0][0] + numVertices*numVertices; ++it) {
         *it = 1000000; // initialize edge distances to 1,000,000
     }
     int i = 0; 
     int j = 0;
-    for (Tile* t: tempGrid->grid) {
-        // mark distances of neighbors to 1
-        set<Tile*> neighbors = t->getTraversableNeighbors;
-        for(auto n : neighbors) {
-            edges[i][j++] = 1; // i is index of current tile, j is neighbor
+    for(i=0; i < tempGrid->grid->size(); ++i) {
+        for(j=0; j < tempGrid->grid->at(i).size();++j) {
+            // mark distances of neighbors to 1
+
+            std::set<Tile*> neighbors = tempGrid->getTraversableNeighbors(*(tempGrid->getTile(i,j)->getLocation()));
+            for(auto n : neighbors) {
+                edgesMat[i][j++] = 1; // i is index of current tile, j is neighbor
+            }
         }
-        ++i;
     }
     // copy into edges array
     i = 0; // index for edges array
-    for(int* it = &edges[0][0]; it != &edges[0][0]+numVertices*numVertices;++it) {
-        edges[i] = *it;
+    for(int* it = &edgesMat[0][0]; it != &edgesMat[0][0]+numVertices*numVertices;++it) {
+        edgesArr[i] = *it;
         ++i;
     }
 
-    bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edges, distances);
+    cudaError_t cuda_ret;
 
+    cudaDeviceSynchronize();
+
+    bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edgesArr, distances);
+
+    cuda_ret = cudaDeviceSynchronize();
+    if(cuda_ret != cudaSuccess) {
+        FATAL("Unable to launch kernel");
+    }
+
+    // distances has shortest dist from start to other nodes
+    // construct joints from distances
+    // FIXME: finish
     /*BEGIN DIJKSTRAS
     
     while(!setQ.empty()) {
@@ -313,3 +332,4 @@ Coord2D GameGrid2D::getRandomNonBase() {
     
     return Coord2D(x, y);
 }
+#endif

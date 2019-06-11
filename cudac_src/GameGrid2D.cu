@@ -1,5 +1,11 @@
+#ifndef __TEST__    
+#define __TEST__
+
 #include "GameGrid2D.h"
 #include "kernel.cu"
+#include "support.h"
+
+extern void bellman_ford(int,int,int,int*,int*);
 
 void GameGrid2D::populateBestPath(Path& p) {
     Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
@@ -76,7 +82,16 @@ void GameGrid2D::populateBestPath(Path& p) {
         ++i;
     }
 
+    cudaError_t cuda_ret;
+
+    cudaDeviceSynchronize();
+
     bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edgesArr, distances);
+
+    cuda_ret = cudaDeviceSynchronize();
+    if(cuda_ret != cudaSuccess) {
+        FATAL("Unable to launch kernel");
+    }
 
     // distances has shortest dist from start to other nodes
     // construct joints from distances
@@ -317,3 +332,4 @@ Coord2D GameGrid2D::getRandomNonBase() {
     
     return Coord2D(x, y);
 }
+#endif

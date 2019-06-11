@@ -1,3 +1,6 @@
+#ifndef __KERNEL_CU__
+#define __KERNEL_CU__
+
 // source: https://github.com/sunnlo/BellmanFord/blob/master/cuda_bellman_ford.cu
 
 __global__ void bellman_ford_kernel(int n, int* d_edges, int* d_distances, bool* next) {
@@ -81,3 +84,4 @@ void bellman_ford(int blocksPerGrid, int threadsPerBlock, int n, int* edges, int
     cudaFree(d_distances);
     cudaFree(d_next);
 }
+#endif
