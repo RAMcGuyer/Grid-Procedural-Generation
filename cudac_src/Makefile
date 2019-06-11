@@ -10,6 +10,9 @@ DEPS	:= Coord2D.h Tile.h Path.h Grid2D.h GameGrid2D.h #Hash.h
 
 all: $(TARGETS)
 
+cuda: MainDriver.cpp Path.cpp Coord2D.cpp Tile.cpp Grid2D.cpp GameGrid2D.cu kernel.cu Path.h Coord2D.h Tile.h Grid2D.h GameGrid2D.h 
+	nvcc -std=c++11 MainDriver.cpp GameGrid2D.cu Coord2D.cpp Grid2D.cpp Path.cpp Tile.cpp -lcudart -L/usr/local/cuda/lib64 -o cudaprocgen
+
 clean:
 	rm -f $(TARGETS) $(OBJ)
 
