@@ -1,6 +1,6 @@
 // source: https://github.com/sunnlo/BellmanFord/blob/master/cuda_bellman_ford.cu
 #include <stdio.h>
-
+#include "Coord2D.h"
 
 __global__ void bellman_ford_kernel(int n, int* d_edges, int* d_distances, bool* next) {
     unsigned INF = 1000000;
@@ -82,4 +82,28 @@ void bellman_ford(int blocksPerGrid, int threadsPerBlock, int n, int* edges, int
     cudaFree(d_edges);
     cudaFree(d_distances);
     cudaFree(d_next);
+}
+
+
+ __global__ void calcPaths(Coord2D* routes, int start, int end, int index, Coord2D* srcs, Coord2D* dests){
+
+    int xStep = dests[index].first - srcs[index].first;
+    int yStep = dests[index].second - srcs[index].second;
+
+    if(xStep < 0) {xStep /= (-1)*xStep;}
+    else if(xStep > 0) {xStep /= xStep;}
+    if(yStep < 0) {yStep /= (-1)*yStep;}
+    else if(yStep > 0) {yStep /= yStep;}
+    routes[start].first = xStep;
+    routes[start].second = yStep;
+    printf("Routes at start: first=%d second=%d\n", routes[start].first, routes[start].second);
+}
+
+__global__ void getPaths(Coord2D* routes, int* sizes, Coord2D* srcs, Coord2D* dests){
+    int tid = threadIdx.x + blockIdx.x*blockDim.x; //Num threads path_sz - 1
+    printf("Inside kernel with thread: %d\n", tid);
+    int start = sizes[tid];
+    int end = sizes[tid+1];
+    calcPaths<<<1, 1>>> (routes, start, end, tid, srcs, dests);
+    cudaDeviceSynchronize();
 }
