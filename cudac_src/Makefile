@@ -2,7 +2,7 @@ CC	= g++
 NVCC = nvcc
 CXX_FLAGS = -std=c++11#-Wall -Wno-nonnull-compare #-Wfatal-errors
 NVCC_FLAGS = -O3 -I/usr/local/cuda/include -arch=sm_30
-LD_FLAGS = -lcudart -L/usr/local/cuda/lib64
+LD_FLAGS = -lcudart -rdc=true -L/usr/local/cuda/lib64
 EXE = procgen
 OBJ	= MainDriver.o Coord2D.o Tile.o Path.o Grid2D.o
 DEPS	= Coord2D.h Tile.h Path.h Grid2D.h GameGrid2D.h#Hash.h

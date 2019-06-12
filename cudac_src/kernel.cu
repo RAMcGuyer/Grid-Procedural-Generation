@@ -83,3 +83,27 @@ void bellman_ford(int blocksPerGrid, int threadsPerBlock, int n, int* edges, int
     cudaFree(d_distances);
     cudaFree(d_next);
 }
+
+ __global__ void calcPaths(Coord2D* grid, Coord2D* routes, int start, int end, int index, Coord2D* srcs Coord2D* dests)
+
+    int xStep = (dests[index].first - srcs[index].first);
+    int yStep = (dests[index].second - srcs[index].second);
+
+    if(xStep < 0) {xStep /= (-1)*xStep;}
+    else if(xStep > 0) {xStep /= xStep;} 
+    if(yStep < 0) {yStep /= (-1)*yStep;}
+    else if(yStep > 0) {yStep /= yStep;} 
+
+}
+
+__global__ void getPaths(Coord2D* grid, Coord2D* routes, int* sizes, Coord2D* srcs, Coord2D* dests){
+
+    int tid = threadIdx.x + blockIdx.x*blockDim.x; //Num threads path_sz - 1
+    int start = sizes[tid];
+    int end = sizes[tid+1];
+    calcPaths<<<1, 1>>> (grid, routes, start, end, tid, srcs);
+    cudaDeviceSynchronize();
+
+} 
+
+
