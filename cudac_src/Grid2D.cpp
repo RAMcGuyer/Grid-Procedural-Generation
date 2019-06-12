@@ -22,18 +22,19 @@ Grid2D::Grid2D(Coord2D dimensions) {
 	}
 }
 
-Grid2D::Grid2D(const Coord2D& corner1, const Coord2D& corner2){
+Grid2D::Grid2D(Coord2D corner1, Coord2D corner2){
 	assert(corner1.first >= 0);
 	assert(corner1.second >= 0);
 	assert(corner2.first >= 0);
 	assert(corner2.second >= 0);
 
-	ROWS = abs(corner2.second - corner1.second);
-	COLS = abs(corner2.first - corner1.first);
+	ROWS = abs(corner2.second - corner1.second) + 1;
+	COLS = abs(corner2.first - corner1.first)+1;
 	setIsMirrored(determineIfMirror(corner1, corner2));
 	grid = new vector<vector<Tile*> > (ROWS, vector<Tile*>(COLS,NULL));
-	int yPath = growsUp(corner1, corner2);
+	int yPath;
 	if(isMirrored){
+		yPath = growsUp(corner2, corner1);
 		for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 			for (int thisCol = 0; thisCol < COLS; thisCol++) {
 				setOffsetTile(Tile::TileType::EMPTY, thisCol, thisRow,
@@ -42,6 +43,7 @@ Grid2D::Grid2D(const Coord2D& corner1, const Coord2D& corner2){
 		}	
 	}
 	else{
+		yPath = growsUp(corner1, corner2);
 		for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 			for (int thisCol = 0; thisCol < COLS; thisCol++) {
 				setOffsetTile(Tile::TileType::EMPTY, thisCol, thisRow, 
@@ -183,7 +185,7 @@ bool Grid2D::determineIfMirror(Coord2D c1, Coord2D c2){
 	
 }
 
-int Grid2D::growsUp(const Coord2D& c1,const Coord2D& c2){
+int Grid2D::growsUp(Coord2D c1, Coord2D c2){
 	int result = -1;
 	if(c2.second - c1.second < 0){
 		result = 1;
@@ -469,9 +471,17 @@ std::set<Tile*> Grid2D::getTraversableNeighbors(Coord2D location) {
 }
 
 int Grid2D::getROWS(){
-	return this->ROWS;
+	return ROWS;
 }
 
 int Grid2D::getCOLS(){
-	return this->COLS;
+	return COLS;
+}
+
+bool Grid2D::areNeighbors(Coord2D c1, Coord2D c2){
+    bool result = false;
+    if(abs(c2.first - c1.first) == 1 || abs(c2.second - c1.second) == 1)
+        result = true;
+
+   return result;
 }
