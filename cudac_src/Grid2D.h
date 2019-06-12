@@ -29,12 +29,13 @@ class Grid2D {
 		void setTile(Tile::TileType t, Coord2D location);
 		void setOffsetTile(Tile::TileType t, int x, int y, Coord2D location);
 		Tile* getTile(Coord2D location) const;
-	    Tile* getTile(int x, int y) const;
+	        Tile* getTile(int x, int y) const;
 		void assertBounds(Coord2D location) const;
 		bool checkBounds(Coord2D location) const;
 		Coord2D getGridDimensions();
 		int size();
 		std::string getChar(Coord2D location);
+                bool areNeighbors(Coord2D c1, Coord2D c2);
 		bool canGoUp(Coord2D location);
 		bool canGoDown(Coord2D location);
 		bool canGoLeft(Coord2D location);

@@ -2,6 +2,13 @@
 
 using namespace std;
 
+Path::Path(){
+   this->grid = NULL;
+   this->joints = NULL;
+   this->thickness = 0;
+
+}
+
 Path::Path(Grid2D* grid) {
     this->grid=grid;
     this->joints=new list<Coord2D>();
