@@ -1,5 +1,5 @@
-CC		:= g++
-CXXFLAGS:= -std=c++11 -Wall -Wno-nonnull-compare #-Wfatal-errors
+CC		:= nvcc
+CXXFLAGS:= -std=c++11 
 LDFLAGS := 
 
 TARGETS := procgen

@@ -28,10 +28,18 @@ Path::Path(Grid2D* grid, list<Coord2D> & joints, int thickness) { // FIXME: how 
     this->thickness=thickness;
 }
 
+Path::Path(const Path& other) {
+	this->grid = other.grid;
+	this->joints = new list<Coord2D>(*other.joints);
+	this->thickness = other.thickness;
+	this->src = other.src;
+	this->dst = other.dst;
+}
+
 Path::~Path() {
     //for (unsigned int i = 0; i < joints->size(); i++)
 	//	delete joints[i];
-	//delete joints;
+	delete joints;
 }
 
 bool Path::areCompatibleJoints(Coord2D joint1, Coord2D joint2) {
