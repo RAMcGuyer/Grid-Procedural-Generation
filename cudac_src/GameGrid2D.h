@@ -19,6 +19,9 @@ using namespace std::chrono;
 
 class GameGrid2D : public Grid2D {
     public:
+        void AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, int grid_sz, int path_sz);
+        unsigned int determineSize(Coord2D c1, Coord2D c2);
+        void swapSrc(Coord2D* src, Coord2D* dest);
         GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
             init(thickness, landmarks);
         }

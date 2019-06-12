@@ -2,12 +2,23 @@
 #include "kernel.cu"
 
 void GameGrid2D::populateBestPath(Path& p) {
-    Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
-    Tile* srcTile = tempGrid->getTile(p.src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
-    Tile* destTile = tempGrid->getTile(p.dst); // on insert/delete, but since we don't modify tempGrid, this should be fine
-    srcTile->setDistance(0);
-    // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
-
+    Grid2D* tempGrid = new Grid2D(p.src, p.dst);
+    int INF = 1000000;
+    unsigned int numVerts = tempGrid->size();
+    int *distances;
+    int *edges;
+    Tile* srcTile;
+    Tile* destTile;
+    //Initialize source and desitination Tile
+    if(tempGrid->checkIsMirrored()){
+        srcTile = tempGrid->getTile(p.dst); 
+        destTile = tempGrid->getTile(p.src);
+    }
+    else{
+        srcTile = tempGrid->getTile(p.src); 
+        destTile = tempGrid->getTile(p.dst);
+    } 
+    
     if(p.src == p.dst) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
     if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
         cout << "Path attempted on non-traversable srcTile" << endl;
@@ -18,6 +29,47 @@ void GameGrid2D::populateBestPath(Path& p) {
         exit(1);
     }
 
+    distances = (int*) malloc(sizeof(unsigned int)*numVerts);
+    edges = (int*) malloc(sizeof(int)*numVerts*numVerts);
+    int fromX = 0;
+    int fromY = 0;
+    int toX = 0;
+    int toY = 0;
+    //Initialize all edges with either 1 if the two vertices are adjacent
+    // or INF if there is no edge connecting them.
+    // Vertices have no edge to themselves
+    for(unsigned i = 0; i < numVerts; i++){
+        for(unsigned j = 0; j < numVerts; j++){
+           Coord2D* currVert = tempGrid->getTile(fromY, fromX)->getLocation();
+           Coord2D* otherVert = tempGrid->getTile(toY, toX)->getLocation();
+           if(areNeighbors(*currVert, *otherVert)){
+               edges[i*numVerts+j] = 1;
+           }
+           else{
+               edges[i*numVerts+j] = INF;
+           } 
+           
+           if(j >= tempGrid->getROWS())
+               fromY = j/tempGrid->getROWS();
+           toX = j%tempGrid->getCOLS();
+        }
+
+        if(i >= tempGrid->getROWS())
+            fromY = i/tempGrid->getROWS();
+        fromX = i%tempGrid->getCOLS();
+        toX = 0;
+        toY = 0; 
+    } //End of edge initialization
+    int threadsPerBlock = 256; //Standard amount of threads per block
+    int blocksPerGrid = (numVerts/threadsPerBlock) + 1;
+   
+/*
+ * Error checking
+ */
+    bellman_ford(blocksPerGrid, threadsPerBlock, numVerts, edges, distances);
+//End check
+//
+/* THIS IS LEGACY FOR USING DIJKTRA'S
     std::set<Tile*> setQ;
     setQ.insert(p.grid->getTile(0, 0));
 
@@ -30,7 +82,11 @@ void GameGrid2D::populateBestPath(Path& p) {
             }
         }
     }
-
+*/
+/*
+ * Error Checking
+ */
+/* LEGACY CODE
     if(setQ.find(srcTile) == setQ.end()) {
         cout << "setQ doesn't contain srcTile" << endl;
         exit(1);
@@ -38,9 +94,14 @@ void GameGrid2D::populateBestPath(Path& p) {
     if(setQ.find(destTile) == setQ.end()) {
         cout << "setQ doesn't contain destTile" << endl;
     } //Line 155
+*/
+//End Check 
 
-    // Tile* uTile = nullptr;
 
+
+ //   Tile* uTile = nullptr;
+/*
+THIS IS ALL MARCOS' CODE. I have preserved it just in case.
     //setQ holds all traversable tiles
     int threadsPerBlock;    
     int blocksPerGrid;
@@ -50,37 +111,31 @@ void GameGrid2D::populateBestPath(Path& p) {
     int distances[numVertices];
 
     threadsPerBlock = 256; // each thread handles an edge
-    blocksPerGrid = ceil(float(numVertices)/threadsPerBlock);
+    blocksPerGrid = ceil(float(n)/threadsPerBlock);
 
     // Populate the edges matrix
     // initialize edge values using iterator
-    for(int* it = &edgesMat[0][0]; it != &edgesMat[0][0] + numVertices*numVertices; ++it) {
+    for(int* it = &edgesArr[0][0]; it != &edgesArr[0][0] + numVertices*numVertices; ++it) {
         *it = 1000000; // initialize edge distances to 1,000,000
     }
     int i = 0; 
     int j = 0;
-    for(i=0; i < tempGrid->grid->size(); ++i) {
-        for(j=0; j < tempGrid->grid->at(i).size();++j) {
-            // mark distances of neighbors to 1
-
-            std::set<Tile*> neighbors = tempGrid->getTraversableNeighbors(*(tempGrid->getTile(i,j)->getLocation()));
-            for(auto n : neighbors) {
-                edgesMat[i][j++] = 1; // i is index of current tile, j is neighbor
-            }
+    for (Tile* t: tempGrid->grid) {
+        // mark distances of neighbors to 1
+        set<Tile*> neighbors = t->getTraversableNeighbors();
+        for(auto n : neighbors) {
+            edges[i][j++] = 1; // i is index of current tile, j is neighbor
         }
+        ++i;
     }
     // copy into edges array
     i = 0; // index for edges array
-    for(int* it = &edgesMat[0][0]; it != &edgesMat[0][0]+numVertices*numVertices;++it) {
-        edgesArr[i] = *it;
+    for(int* it = &edges[0][0]; it != &edges[0][0]+numVertices*numVertices;++it) {
+        edges[i] = *it;
         ++i;
     }
+*/ 
 
-    bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edgesArr, distances);
-
-    // distances has shortest dist from start to other nodes
-    // construct joints from distances
-    // FIXME: finish
     /*BEGIN DIJKSTRAS
     
     while(!setQ.empty()) {
@@ -261,30 +316,40 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
         cout << "THIS IS 0"<<endl;
         exit(1);
     }
-
+    /*
+    Coord2D* coordGrid[this->getROWS()*this->getCOLS()];
+    for(unsigned i = 0; this->getROWS(); i++){
+        for(unsigned j = 0; j < this->getCOLS(); j++){
+            coordGrid[i*this->getROWS()+j]  = Coord2D(j, i);
+        }
+    } */
     vector<Path> paths;
     vector<Coord2D> marks;
-
+    
     for(auto i : landmarks){
         marks.push_back(i);
     } 
+    Path routes[landmarks.size()];
+    Coord2D srcs[landmarks.size()];
+    Coord2D dests[landmarks.size()];
     //cout <<"gFP before for"<<endl;
-    unsigned int one = 1;	// done to surpress warning from -Wall compiler flag
-    for (unsigned int i = 0; i < landmarks.size() - one; i++) {
+    unsigned int two = 2;	// done to surpress warning from -Wall compiler flag
+    for (unsigned int i = 0; i < landmarks.size() - two; i++) {
 
-        Coord2D landmark1 = marks.at(i);
-        Coord2D landmark2 = marks.at(i + 1);
-        //cout << "gFP before Path for i:"<<i<<endl;
-        if(this == 0) {
-            cout << "THIS IS 0"<<endl;
-            exit(1);
-        }
-        Path p = Path(this, landmark1, landmark2, thickness);
-        populateBestPath(p);
-        //cout <<"gFP after Path"<<endl;
-        paths.push_back(p);
+        srcs[i] = marks.at(i);
+        dests[i] =  marks.at(i + 1);
+
+	printf("marks[i] = first: %d, second: %d", marks.at(i).first, marks.at(i).second);
+	printf("   marks[i+1] = first: %d, second: %d\n", marks.at(i+1).first, marks.at(i+1).second);
+	printf("srcs[i] = first: %d, second: %d\n", srcs[i].first, srcs[i].second);
+	printf("dests[i] = first: %d, second: %d\n", dests[i].first, dests[i].second);
+        routes[i] = Path(this, srcs[i], dests[i], thickness);
     }
-    //cout <<"gFP after for"<<endl;
+//Break point 0
+    AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, this->getROWS()*this->getCOLS(), landmarks.size());
+    for(unsigned int k = 0; k < landmarks.size();k++){
+	paths.push_back(routes[k]); //This currently segfaults
+    }
     return paths;
 }
 
@@ -316,4 +381,41 @@ Coord2D GameGrid2D::getRandomNonBase() {
     }
     
     return Coord2D(x, y);
+}
+
+void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, 
+    int grid_sz, int path_sz){
+//Breakpoint 1
+    int* sizes;
+    Coord2D* routes;
+    unsigned int totalSize = 0;
+    for(unsigned i = 0; i < path_sz; i++){
+	sizes[i] = determineSize(srcs[i], dests[i]);
+        totalSize += sizes[i];
+    }
+    cudaMallocManaged((void**) &sizes, sizeof(int)*path_sz);
+    cudaMallocManaged((void**) &srcs, sizeof(Coord2D)*path_sz);
+    cudaMallocManaged((void**) &dests, sizeof(Coord2D)*path_sz);
+    cudaMallocManaged((void**) &routes, sizeof(Coord2D)*totalSize);
+//BreakPoint 2
+   getPaths<<<1, 8>>> (routes, sizes, srcs, dests);
+   cudaDeviceSynchronize();
+}
+
+unsigned int GameGrid2D::determineSize(Coord2D c1, Coord2D c2){
+
+    unsigned int rows = abs(c2.second - c1.second);
+    unsigned int cols = abs(c2.first - c1.first);
+    
+    return rows+cols-1;
+}
+
+
+
+void GameGrid2D::swapSrc(Coord2D* src, Coord2D* dest){
+
+	Coord2D* temp = src;
+        src = dest;
+        dest = temp;
+
 }
