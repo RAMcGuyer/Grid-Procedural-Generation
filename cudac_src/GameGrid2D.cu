@@ -9,56 +9,44 @@
 extern void bellman_ford(int,int,int,int*,int*);
 
 void GameGrid2D::populateBestPath(Path& p) {
-    Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
-    Tile* srcTile = tempGrid->getTile(p.src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
-    Tile* destTile = tempGrid->getTile(p.dst); // on insert/delete, but since we don't modify tempGrid, this should be fine
-    srcTile->setDistance(0);
-    // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
+    // Grid2D* tempGrid = new Grid2D(p.grid); // FIXME: error here?
+    // Tile* srcTile = tempGrid->getTile(p.src); // usually we don't want to work with pointers to vector elements bc vector mem is reallocated
+    // Tile* destTile = tempGrid->getTile(p.dst); // on insert/delete, but since we don't modify tempGrid, this should be fine
+    // srcTile->setDistance(0);
+    // // cout<<"\nsrcTile:\n"<<srcTile->toString()<<endl;
 
-    if(p.src == p.dst) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
-    if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
-        cout << "Path attempted on non-traversable srcTile" << endl;
-        exit(1);
-    }
-    if(destTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
-        cout << "Path attempted on non-traversable destTile" << endl;
-        exit(1);
-    }
+    // if(p.src == p.dst) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
+    // if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
+    //     cout << "Path attempted on non-traversable srcTile" << endl;
+    //     exit(1);
+    // }
+    // if(destTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
+    //     cout << "Path attempted on non-traversable destTile" << endl;
+    //     exit(1);
+    // }
 
-    std::set<Tile*> setQ;
-    setQ.insert(p.grid->getTile(0, 0));
+    // std::set<Tile*> setQ;
+    // setQ.insert(p.grid->getTile(0, 0));
 
-    for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
-        for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-            //Tile* tempTile = tempGrid->grid->at(i).at(j);
-            Tile* tempTile = tempGrid->getTile(i, j);
-			if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
-                setQ.insert(tempTile);
-            }
-        }
-    }
+    // for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
+    //     for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
+    //         //Tile* tempTile = tempGrid->grid->at(i).at(j);
+    //         Tile* tempTile = tempGrid->getTile(i, j);
+	// 		if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
+    //             setQ.insert(tempTile);
+    //         }
+    //     }
+    // }
 
-    if(setQ.find(srcTile) == setQ.end()) {
-        cout << "setQ doesn't contain srcTile" << endl;
-        exit(1);
-    }
-    if(setQ.find(destTile) == setQ.end()) {
-        cout << "setQ doesn't contain destTile" << endl;
-    } //Line 155
+    // if(setQ.find(srcTile) == setQ.end()) {
+    //     cout << "setQ doesn't contain srcTile" << endl;
+    //     exit(1);
+    // }
+    // if(setQ.find(destTile) == setQ.end()) {
+    //     cout << "setQ doesn't contain destTile" << endl;
+    // } //Line 155
 
     // Tile* uTile = nullptr;
-
-    //setQ holds all traversable tiles
-    int n = this->grid->at(0).size(); // grid is size NxN; this assigns n=N
-    int threadsPerBlock;    
-    int blocksPerGrid;
-    int numVertices = setQ.size(); // numVertices should be num of tiles in grid we're populating over; numVertices = nxn
-    int edgesMat[numVertices][numVertices];
-    int edgesArr[numVertices*numVertices];
-    pair<int, pair<int,int> > distances[numVertices]; // distances holds pairs containing distance from src and a pair of location coordinates for that tile
-
-    threadsPerBlock = 256; // each thread handles an edge
-    blocksPerGrid = ceil(float(numVertices)/threadsPerBlock);
 
     /** Need to make tempGrid
      * tempGrid takes src and dst locations and constructs a standardized grid like this:
@@ -67,6 +55,26 @@ void GameGrid2D::populateBestPath(Path& p) {
      * |          |
      * src---------
      **/
+     cout << "src, dst: ";
+     cout << p.src << ", " << p.dst<<endl;
+     cout << "BEFORE CONSTRUCTOR" << endl;
+     Grid2D tempGrid = Grid2D(p.src, p.dst);
+     cout << "AFTER CONSTRUCTOR" << endl;
+    //setQ holds all traversable tiles
+    int threadsPerBlock;    
+    int blocksPerGrid;
+
+    int tempGridRows = tempGrid.grid->size(); 
+    int tempGridCols = tempGrid.grid->at(0).size();
+    int numVertices = tempGridCols*tempGridRows; // numVertices should be total num of tiles in grid; numVertices = rows*cols
+    int edgesMat[numVertices][numVertices];
+    int edgesArr[numVertices*numVertices]; // flattened version of edgesMatrix
+    // pair<int, pair<int,int> > distances[numVertices]; // distances holds pairs containing distance from src and a pair of location coordinates for that tile
+    int distances[numVertices]; // initialized in kernel
+
+    threadsPerBlock = 256; // each thread handles an edge
+    blocksPerGrid = ceil(float(numVertices)/threadsPerBlock);
+
 
     // Populate the edges matrix
     // initialize edge values using iterator
@@ -82,27 +90,28 @@ void GameGrid2D::populateBestPath(Path& p) {
             // neighbors are left, right, up, down
             // check bounds
             if(i == j) {
-                if(i-n >= 0) edgesMat[i-n][j] = 1; // distances: tile -> neighbor above *in grid*
-                if(i+n < numVertices) edgesMat[i+n][j] = 1; // distance: tile -> neighbor below in grid
+                if(i-tempGridRows >= 0) edgesMat[i-tempGridRows][j] = 1; // distances: tile -> neighbor above *in grid*
+                if(i+tempGridRows < numVertices) edgesMat[i+tempGridRows][j] = 1; // distance: tile -> neighbor below in grid
 
                 // for neighbors adjacent left/right, make sure the current tile is 
                 // not on edge (tiles on left/right edges have no left/right neighbors)
-                if(i-1 >= 0 && i % n != 0) edgesMat[i-1][j] = 1; // distance: tile -> neighbor adjacent left in grid
-                if(i+1 < numVertices && ((i+1) % n != 0)) edgesMat[i+1][j] = 1; // distance: tile -> neighbor adjacent right in grid
+                if(i-1 >= 0 && (i % tempGridCols != 0)) edgesMat[i-1][j] = 1; // distance: tile -> neighbor adjacent left in grid
+                if(i+1 < numVertices && ((i+1) % tempGridCols != 0)) edgesMat[i+1][j] = 1; // distance: tile -> neighbor adjacent right in grid
                 
 
                 // the following are the exact same thing, but we still need them for bellman ford's alg
-                // possible to be more efficient about this...
-                if(j-n >= 0) edgesMat[i][j-n] = 1; 
-                if(j+n < numVertices) edgesMat[i][j+n] = 1;
-                if(j-1 >= 0 && j % n != 0) edgesMat[i][j-1] = 1;
-                if(j+1 < numVertices && ((j+1) % n == 0)) edgesMat[i][j+1] = 1;
+                // theres probably a way to be more efficient about this...
+                if(j-tempGridRows >= 0) edgesMat[i][j-tempGridRows] = 1; 
+                if(j+tempGridRows < numVertices) edgesMat[i][j+tempGridRows] = 1;
+                if(j-1 >= 0 && (j % tempGridCols != 0)) edgesMat[i][j-1] = 1;
+                if(j+1 < numVertices && ((j+1) % tempGridCols == 0)) edgesMat[i][j+1] = 1;
 
 
                 edgesMat[i][j] = 0; // distance from tile to itself
             }
         }
     }
+
     // copy into edges array
     i = 0; // index for edges array
     for(int* it = &edgesMat[0][0]; it != &edgesMat[0][0]+numVertices*numVertices;++it) {
@@ -132,6 +141,22 @@ void GameGrid2D::populateBestPath(Path& p) {
     if(cuda_ret != cudaSuccess) {
         FATAL("Unable to launch kernel");
     }
+
+    cout << "RETURN FROM KERNEL" << endl;
+    cout << "tempGrid dim: " << tempGridRows << " x "<< tempGridCols <<endl;
+    for (i = 0; i < numVertices; ++i) {
+        if(i % tempGridCols == 0) {
+            cout << endl;
+        }
+        if(distances[i] < 10) {
+            cout << distances[i] << "   ";
+        }
+        else {
+            cout << distances[i] << "  ";
+        }
+    }
+    cout << endl;
+    exit(0);
 
     // distances has shortest dist from start to other nodes
     // construct joints from distances

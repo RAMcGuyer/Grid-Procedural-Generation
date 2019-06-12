@@ -22,7 +22,7 @@ Grid2D::Grid2D(Coord2D dimensions) {
 	}
 }
 
-Grid2D::Grid2D(Coord2D corner1, Coord2D corner2){
+Grid2D::Grid2D(const Coord2D& corner1, const Coord2D& corner2){
 	assert(corner1.first >= 0);
 	assert(corner1.second >= 0);
 	assert(corner2.first >= 0);
@@ -183,7 +183,7 @@ bool Grid2D::determineIfMirror(Coord2D c1, Coord2D c2){
 	
 }
 
-int Grid2D::growsUp(Coord2D c1, Coord2D c2){
+int Grid2D::growsUp(const Coord2D& c1,const Coord2D& c2){
 	int result = -1;
 	if(c2.second - c1.second < 0){
 		result = 1;
@@ -468,10 +468,10 @@ std::set<Tile*> Grid2D::getTraversableNeighbors(Coord2D location) {
 	return neighbors;
 }
 
-Grid2D::getROWS(){
+int Grid2D::getROWS(){
 	return this->ROWS;
 }
 
-Grid2D::getCOLS(){
+int Grid2D::getCOLS(){
 	return this->COLS;
 }

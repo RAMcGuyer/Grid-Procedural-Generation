@@ -20,7 +20,7 @@ class Grid2D {
 		
 		Grid2D();
 		Grid2D(Coord2D dimensions);
-                Grid2D(Coord2D corner1, Coord2D corner2);
+                Grid2D(const Coord2D& corner1, const Coord2D& corner2);
 		Grid2D(const Grid2D& other);
 		Grid2D(Grid2D* other);
 		~Grid2D();
@@ -40,7 +40,7 @@ class Grid2D {
 		bool canGoLeft(Coord2D location);
 		bool canGoRight(Coord2D location);
 		bool determineIfMirror(Coord2D c1, Coord2D c2);
-		int growsUp(Coord2D c1, Coord2D c2);
+		int growsUp(const Coord2D& c1, const Coord2D& c2);
 		int getROWS();
 		int getCOLS();
 		Tile* getUp(Coord2D fromHere);
