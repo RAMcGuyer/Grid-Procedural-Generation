@@ -36,14 +36,14 @@ Grid2D::Grid2D(Coord2D corner1, Coord2D corner2){
 	if(isMirrored){
 		yPath = growsUp(corner2, corner1);
 		for (int thisRow = 0; thisRow < ROWS; thisRow++) {
-			for (int thisCol = 0; thisC`ol < COLS; thisCol++) {
+			for (int thisCol = 0; thisCol < COLS; thisCol++) {
 				setOffsetTile(Tile::TileType::EMPTY, thisCol, thisRow,
 					Coord2D(corner2.first+thisCol, corner2.second+yPath*thisRow));
 			}
 		}	
 	}
 	else{
-		yPath = growUp(corner1, corner2);
+		yPath = growsUp(corner1, corner2);
 		for (int thisRow = 0; thisRow < ROWS; thisRow++) {
 			for (int thisCol = 0; thisCol < COLS; thisCol++) {
 				setOffsetTile(Tile::TileType::EMPTY, thisCol, thisRow, 
