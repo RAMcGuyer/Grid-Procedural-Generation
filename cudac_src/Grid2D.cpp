@@ -468,10 +468,18 @@ std::set<Tile*> Grid2D::getTraversableNeighbors(Coord2D location) {
 	return neighbors;
 }
 
-Grid2D::getROWS(){
-	return this->ROWS;
+int Grid2D::getROWS(){
+	return ROWS;
 }
 
-Grid2D::getCOLS(){
-	return this->COLS;
+int Grid2D::getCOLS(){
+	return COLS;
+}
+
+bool Grid2D::areNeighbors(Coord2D c1, Coord2D c2){
+    bool result = false;
+    if(abs(c2.first - c1.first) == 1 || abs(c2.second - c1.second) == 1)
+        result = true;
+
+   return result;
 }
