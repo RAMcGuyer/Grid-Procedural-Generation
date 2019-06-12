@@ -48,9 +48,10 @@ void GameGrid2D::populateBestPath(Path& p) {
     // Tile* uTile = nullptr;
 
     //setQ holds all traversable tiles
+    int n = this->grid->at(0).size(); // grid is size NxN; this assigns n=N
     int threadsPerBlock;    
     int blocksPerGrid;
-    int numVertices = setQ.size();
+    int numVertices = setQ.size(); // numVertices should be num of tiles in grid we're populating over; numVertices = nxn
     int edgesMat[numVertices][numVertices];
     int edgesArr[numVertices*numVertices];
     int distances[numVertices];
@@ -65,13 +66,31 @@ void GameGrid2D::populateBestPath(Path& p) {
     }
     int i = 0; 
     int j = 0;
-    for(i=0; i < tempGrid->grid->size(); ++i) {
-        for(j=0; j < tempGrid->grid->at(i).size();++j) {
-            // mark distances of neighbors to 1
+    for(i=0; i < numVertices; ++i) {
+        for(j=0; j < numVertices; ++j) {
 
-            std::set<Tile*> neighbors = tempGrid->getTraversableNeighbors(*(tempGrid->getTile(i,j)->getLocation()));
-            for(auto n : neighbors) {
-                edgesMat[i][j++] = 1; // i is index of current tile, j is neighbor
+            // mark distances of neighbors to 1
+            // neighbors are left, right, up, down
+            // check bounds
+            if(i == j) {
+                if(i-n >= 0) edgesMat[i-n][j] = 1; // distances: tile -> neighbor above *in grid*
+                if(i+n < numVertices) edgesMat[i+n][j] = 1; // distance: tile -> neighbor below in grid
+
+                // for neighbors adjacent left/right, make sure the current tile is 
+                // not on edge (tiles on left/right edges have no left/right neighbors)
+                if(i-1 >= 0 && i % n != 0) edgesMat[i-1][j] = 1; // distance: tile -> neighbor adjacent left in grid
+                if(i+1 < numVertices && ((i+1) % n != 0)) edgesMat[i+1][j] = 1; // distance: tile -> neighbor adjacent right in grid
+                
+
+                // the following are the exact same thing, but we still need them for bellman ford's alg
+                // possible to be more efficient about this...
+                if(j-n >= 0) edgesMat[i][j-n] = 1; 
+                if(j+n < numVertices) edgesMat[i][j+n] = 1;
+                if(j-1 >= 0 && j % n != 0) edgesMat[i][j-1] = 1;
+                if(j+1 < numVertices && ((j+1) % n == 0)) edgesMat[i][j+1] = 1;
+
+
+                edgesMat[i][j] = 0; // distance from tile to itself
             }
         }
     }
@@ -81,6 +100,15 @@ void GameGrid2D::populateBestPath(Path& p) {
         edgesArr[i] = *it;
         ++i;
     }
+
+    // std::cout << "Matrices:" << std::endl;
+    // for(i=0; i < numVertices; ++i) {
+    //     for(j=0; j < numVertices; ++j) {
+    //         std::cout << edgesMat[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // exit(0);
 
     cudaError_t cuda_ret;
 
