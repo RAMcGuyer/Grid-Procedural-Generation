@@ -3,6 +3,50 @@
 
 // source: https://github.com/sunnlo/BellmanFord/blob/master/cuda_bellman_ford.cu
 
+// Libraries needed for diagMatrix
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int** createDiagMatrix(int m, int n) 
+{
+    int** array2D = 0;
+    array2D = new int*[m];
+    int hCounter = 0;
+    int wCounter = 0;
+
+    for (int height = 0; height < m; height++)
+    {
+        array2D[height] = new int [n];
+        
+        for (int width = 0; width < n; width++)
+        {
+            array2D[height][width] = wCounter++;
+        }
+
+        hCounter++;
+        wCounter = hCounter;
+    }
+
+    return array2D;
+}
+
+void printDiagMatrix(int** grid, int m, int n)
+{
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++)
+            cout << setw(5) << grid[i][j];
+        cout << endl;
+    }
+}
+
+void deleteDiagMatrix(int** grid, int m, int n)
+{
+    for (int i = m; i < m; i++)
+        delete [] grid[i];
+    delete [] grid;
+}
+
 __global__ void bellman_ford_kernel(int n, int* d_edges, int* d_distances, bool* next) {
     unsigned INF = 1000000;
     int thread = blockDim.x * blockIdx.x + threadIdx.x;
