@@ -1,6 +1,7 @@
 #ifndef __TEST__    
 #define __TEST__
 
+#include <utility>
 #include "GameGrid2D.h"
 #include "kernel.cu"
 #include "support.h"
@@ -54,10 +55,18 @@ void GameGrid2D::populateBestPath(Path& p) {
     int numVertices = setQ.size(); // numVertices should be num of tiles in grid we're populating over; numVertices = nxn
     int edgesMat[numVertices][numVertices];
     int edgesArr[numVertices*numVertices];
-    int distances[numVertices];
+    pair<int, pair<int,int> > distances[numVertices]; // distances holds pairs containing distance from src and a pair of location coordinates for that tile
 
     threadsPerBlock = 256; // each thread handles an edge
     blocksPerGrid = ceil(float(numVertices)/threadsPerBlock);
+
+    /** Need to make tempGrid
+     * tempGrid takes src and dst locations and constructs a standardized grid like this:
+     * ----------dst
+     * |          |
+     * |          |
+     * src---------
+     **/
 
     // Populate the edges matrix
     // initialize edge values using iterator
@@ -109,6 +118,9 @@ void GameGrid2D::populateBestPath(Path& p) {
     //     std::cout << std::endl;
     // }
     // exit(0);
+
+    // initialize distances[]
+
 
     cudaError_t cuda_ret;
 

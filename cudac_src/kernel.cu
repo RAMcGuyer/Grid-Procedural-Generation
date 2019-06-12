@@ -52,11 +52,11 @@ void bellman_ford(int blocksPerGrid, int threadsPerBlock, int n, int* edges, int
     cudaMalloc(&d_distances, sizeof(int)*n);
     cudaMalloc(&d_next, sizeof(bool));
 
-    // initialize distances to source to INF
-    for(int i = 0; i < n; ++i) {
-        distances[i] = INF;
-    }
-    distances[0] = 0; // dist from source to itself
+    // // initialize distances to source to INF
+    // for(int i = 0; i < n; ++i) {
+    //     distances[i] = INF;
+    // }
+    // distances[0] = 0; // dist from source to itself
 
     // Copy host variables to device
     cudaMemcpy(d_edges, edges, sizeof(int)*n*n, cudaMemcpyHostToDevice);
