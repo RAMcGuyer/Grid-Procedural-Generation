@@ -104,7 +104,7 @@ void Path::setPathType(Tile::TileType type, bool prioritize) {
     for(;it != joints->end();++it) {
         Coord2D secondJoint = *it;
         grid->setTypeLine(firstJoint, secondJoint, type, thickness, prioritize);
-        firstJoint = secondJoint; // FIXME: possible error - does this do the same thing as in java?
+        firstJoint = secondJoint; 
     }
 }
 

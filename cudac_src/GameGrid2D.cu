@@ -158,9 +158,42 @@ void GameGrid2D::populateBestPath(Path& p) {
     cout << endl;
     exit(0);
 
-    // distances has shortest dist from start to other nodes
-    // construct joints from distances
-    // FIXME: finish
+    /** distances[] has shortest dist from start to other nodes
+      * distances[0] dist to src (which is 0)
+      * distances[numVertices-1] is distance to dst
+      * We can construct the shortest path from src to dst with this information
+    */
+    int optimalPathDist = distances[numVertices-1]; // opt path should have this length
+    int currentDist = 0;
+    vector<Coord2D> pathJoints(); // holds joints that make up the shortest path
+
+    // while(pathJoints.size() < optimalPathDist) {
+    //     for(i = 0; i < optimalPathDist) {
+    //         if(currentDist + distances[i] > optimalPathDist) {
+    //             continue; // optimalPathDist exceeded if included; do not add
+    //         }
+    //         else if(currentDist + distances[i] == optimalPathDist && i != numVertices-1) {
+    //             continue; // this path meets optimalPathDist, but doesnt end at dst
+    //         }
+    //         else {
+    //             // currentDist + distances[i] is less than optimalPathDist, so keep building path
+
+    //         }
+    //     }
+    // }
+    int next;
+    while(Condition) {
+        for (i = 0; i < numVertices; ++i) {
+            next = distances[i];
+            if(next == currentDist + 1) {
+                //move there
+                current = next;
+                pathJoints.push_back(next);
+            }
+        }
+        
+    }
+
     /*BEGIN DIJKSTRAS
     
     while(!setQ.empty()) {
