@@ -1,209 +1,6 @@
 #include "GameGrid2D.h"
 #include "kernel.cu"
 
-void GameGrid2D::populateBestPath(Path& p) {
-    Grid2D* tempGrid = new Grid2D(p.src, p.dst);
-    int INF = 1000000;
-    unsigned int numVerts = tempGrid->size();
-    int *distances;
-    int *edges;
-    Tile* srcTile;
-    Tile* destTile;
-    //Initialize source and desitination Tile
-    if(tempGrid->checkIsMirrored()){
-        srcTile = tempGrid->getTile(p.dst); 
-        destTile = tempGrid->getTile(p.src);
-    }
-    else{
-        srcTile = tempGrid->getTile(p.src); 
-        destTile = tempGrid->getTile(p.dst);
-    } 
-    
-    if(p.src == p.dst) { cout << "Attempted autopath to the same tile"<<endl;exit(1);}
-    if(srcTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
-        cout << "Path attempted on non-traversable srcTile" << endl;
-        exit(1);
-    }
-    if(destTile->getType() == Tile::TileType::NON_TRAVERSABLE) {
-        cout << "Path attempted on non-traversable destTile" << endl;
-        exit(1);
-    }
-
-    distances = (int*) malloc(sizeof(unsigned int)*numVerts);
-    edges = (int*) malloc(sizeof(int)*numVerts*numVerts);
-    int fromX = 0;
-    int fromY = 0;
-    int toX = 0;
-    int toY = 0;
-    //Initialize all edges with either 1 if the two vertices are adjacent
-    // or INF if there is no edge connecting them.
-    // Vertices have no edge to themselves
-    for(unsigned i = 0; i < numVerts; i++){
-        for(unsigned j = 0; j < numVerts; j++){
-           Coord2D* currVert = tempGrid->getTile(fromY, fromX)->getLocation();
-           Coord2D* otherVert = tempGrid->getTile(toY, toX)->getLocation();
-           if(areNeighbors(*currVert, *otherVert)){
-               edges[i*numVerts+j] = 1;
-           }
-           else{
-               edges[i*numVerts+j] = INF;
-           } 
-           
-           if(j >= tempGrid->getROWS())
-               fromY = j/tempGrid->getROWS();
-           toX = j%tempGrid->getCOLS();
-        }
-
-        if(i >= tempGrid->getROWS())
-            fromY = i/tempGrid->getROWS();
-        fromX = i%tempGrid->getCOLS();
-        toX = 0;
-        toY = 0; 
-    } //End of edge initialization
-    int threadsPerBlock = 256; //Standard amount of threads per block
-    int blocksPerGrid = (numVerts/threadsPerBlock) + 1;
-   
-/*
- * Error checking
- */
-    bellman_ford(blocksPerGrid, threadsPerBlock, numVerts, edges, distances);
-//End check
-//
-/* THIS IS LEGACY FOR USING DIJKTRA'S
-    std::set<Tile*> setQ;
-    setQ.insert(p.grid->getTile(0, 0));
-
-    for(unsigned int i = 0; i < tempGrid->grid->size(); ++i) {
-        for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-            //Tile* tempTile = tempGrid->grid->at(i).at(j);
-            Tile* tempTile = tempGrid->getTile(i, j);
-			if(tempTile->getType() != Tile::TileType::NON_TRAVERSABLE) {
-                setQ.insert(tempTile);
-            }
-        }
-    }
-*/
-/*
- * Error Checking
- */
-/* LEGACY CODE
-    if(setQ.find(srcTile) == setQ.end()) {
-        cout << "setQ doesn't contain srcTile" << endl;
-        exit(1);
-    }
-    if(setQ.find(destTile) == setQ.end()) {
-        cout << "setQ doesn't contain destTile" << endl;
-    } //Line 155
-*/
-//End Check 
-
-
-
- //   Tile* uTile = nullptr;
-/*
-THIS IS ALL MARCOS' CODE. I have preserved it just in case.
-    //setQ holds all traversable tiles
-    int threadsPerBlock;    
-    int blocksPerGrid;
-    int numVertices = setQ.size();
-    int edgesMat[numVertices][numVertices];
-    int edgesArr[numVertices*numVertices];
-    int distances[numVertices];
-
-    threadsPerBlock = 256; // each thread handles an edge
-    blocksPerGrid = ceil(float(n)/threadsPerBlock);
-
-    // Populate the edges matrix
-    // initialize edge values using iterator
-    for(int* it = &edgesArr[0][0]; it != &edgesArr[0][0] + numVertices*numVertices; ++it) {
-        *it = 1000000; // initialize edge distances to 1,000,000
-    }
-    int i = 0; 
-    int j = 0;
-    for (Tile* t: tempGrid->grid) {
-        // mark distances of neighbors to 1
-        set<Tile*> neighbors = t->getTraversableNeighbors();
-        for(auto n : neighbors) {
-            edges[i][j++] = 1; // i is index of current tile, j is neighbor
-        }
-        ++i;
-    }
-    // copy into edges array
-    i = 0; // index for edges array
-    for(int* it = &edges[0][0]; it != &edges[0][0]+numVertices*numVertices;++it) {
-        edges[i] = *it;
-        ++i;
-    }
-*/ 
-
-    /*BEGIN DIJKSTRAS
-    
-    while(!setQ.empty()) {
-        int runningMin = INT_MAX;
-
-        // here the first tile's distance should be 0
-        for (Tile* t : setQ) {
-            if(t->getDistance() < runningMin) {
-                // cout<<"TEST"<<endl;
-                runningMin = t->getDistance();
-                uTile = t;
-            }
-        }
-
-        if(uTile == NULL) {
-            cout << "Minimum distance tile uTile not properly set" << endl;
-            exit(1);
-        }
-        if(setQ.find(uTile) == setQ.end()) {
-            cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
-            exit(1);
-        }
-        setQ.erase(uTile);
-
-        if(uTile == destTile) { 
-            break;
-        }
-
-        set<Tile*> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
-
-        for (Tile* thisNeighbor : uNeighbors) {
-            int currentDist = uTile->getDistance() + 1;
-            if (currentDist < thisNeighbor->getDistance()) {
-                thisNeighbor->setDistance(currentDist);
-                thisNeighbor->setPreviousTile(uTile);
-            }
-        }
-    }
-    // END DIJKSTRAS*/
-
-    // if (uTile->getPreviousTile() == NULL && uTile != srcTile) {
-    //     cout << "Condition specified by Dijkstra's not met" << endl;
-    //     exit(1);
-    // }
-
-    // while(uTile != NULL) {
-    //     p.joints->push_back(*uTile->getLocation());
-    //     uTile = uTile->getPreviousTile();
-
-    //     bool arePointsSame = (p.src == p.dst);
-
-    //     if (uTile == NULL && p.joints->size() < 2) {
-    //         cerr << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << coord_to_string(p.src) << "\n" <<
-    //         "dest: " << coord_to_string(p.dst) << "\n" <<
-    //         "src.equals(dest)? " << arePointsSame;
-
-    //         exit(1);
-    //     }
-    // }
-    // // delete tempGrid
-    // /*for(unsigned i = 0; i < tempGrid->grid->size();++i) {
-    //     for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-    //         delete tempGrid->grid->at(i).at(j);
-    //     }
-    // }*/
-    // delete tempGrid;
-} //End populateBestPath
-
 void GameGrid2D::drawBases() {
     int gridX = getGridDimensions().first;
     int gridY = getGridDimensions().second;
@@ -329,26 +126,22 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
     for(auto i : landmarks){
         marks.push_back(i);
     } 
-    Path routes[landmarks.size()];
-    Coord2D srcs[landmarks.size()];
-    Coord2D dests[landmarks.size()];
+    vector<Path> routes;
+    Coord2D srcs[landmarks.size()-1];
+    Coord2D dests[landmarks.size()-1];
     //cout <<"gFP before for"<<endl;
-    unsigned int two = 2;	// done to surpress warning from -Wall compiler flag
-    for (unsigned int i = 0; i < landmarks.size() - two; i++) {
-
-        srcs[i] = marks.at(i);
-        dests[i] =  marks.at(i + 1);
-
-	printf("marks[i] = first: %d, second: %d", marks.at(i).first, marks.at(i).second);
-	printf("   marks[i+1] = first: %d, second: %d\n", marks.at(i+1).first, marks.at(i+1).second);
-	printf("srcs[i] = first: %d, second: %d\n", srcs[i].first, srcs[i].second);
-	printf("dests[i] = first: %d, second: %d\n", dests[i].first, dests[i].second);
-        routes[i] = Path(this, srcs[i], dests[i], thickness);
+    unsigned int one = 1;	// done to surpress warning from -Wall compiler flag
+    for (unsigned int i = 0; i < marks.size() - one; i++) {
+        srcs[i].first = marks.at(i).first;
+        srcs[i].second = marks.at(i).second;
+        dests[i].first =  marks.at(i + 1).first;
+        dests[i].second =  marks.at(i + 1).second;
+        routes.push_back(Path(this,srcs[i], dests[i], thickness));
     }
 //Break point 0
-    AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, this->getROWS()*this->getCOLS(), landmarks.size());
-    for(unsigned int k = 0; k < landmarks.size();k++){
-	paths.push_back(routes[k]); //This currently segfaults
+    AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, marks.size());
+    for(unsigned int k = 0; k < marks.size()-1;k++){
+	paths.push_back(routes.at(k)); //This currently segfaults
     }
     return paths;
 }
@@ -382,31 +175,116 @@ Coord2D GameGrid2D::getRandomNonBase() {
     
     return Coord2D(x, y);
 }
+/*
+*AllocateAndCall()
+* PARAMETERS
+*  paths -- reference to vector containing the paths that need to be filled by the GPU
+*  srcs  -- array of all of our src nodes (where each path begins from)
+*  dests -- array of all of our destinatio nnode (where each path ends)
+*  path_sz -- how many paths we are generating. paths.size()
+* FUNCTION
+*  AllocateAndCall creates 4 int arrays. each index in these arrays represents a node in either
+      dests or srcs. The arrays store the x coordiante and y coordinate of each node, and pass those
+      along to the kernel. It also keeps track of the total amoutn of nodes across each path
+*/
+void GameGrid2D::AllocateAndCall(vector<Path> &paths, Coord2D* srcs, Coord2D* dests, int path_sz){
+//Allocate CPU memory
+    int* sizes = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* sizes_h = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* srcsX = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* srcsY = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* destsX = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* destsY = (int*) malloc(sizeof(int)*(path_sz-1));
 
-void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, 
-    int grid_sz, int path_sz){
-//Breakpoint 1
-    int* sizes;
-    Coord2D* routes;
-    unsigned int totalSize = 0;
-    for(unsigned i = 0; i < path_sz; i++){
-	sizes[i] = determineSize(srcs[i], dests[i]);
-        totalSize += sizes[i];
+    unsigned int totalSize = 0; //Tracks how large routesX and routeY should be (see below)
+    for(unsigned i = 0; i < path_sz-1; i++){
+	int s = determineSize(srcs[i], dests[i]); //Determines how many nodes will paths.at(i) will have
+        sizes[i] = s; //For use when we copy data over the paths
+        totalSize += s; //Used to initalize 
+        sizes_h[i] = totalSize; //Each thread will use this to populate a segments of routes_dx and routes_dy
+	srcsX[i] = srcs[i].first;  //The following will be used for some calculations in the kernel
+	srcsY[i] = srcs[i].second; 
+	destsX[i] = dests[i].first; 
+	destsY[i] = dests[i].second; 
     }
-    cudaMallocManaged((void**) &sizes, sizeof(int)*path_sz);
-    cudaMallocManaged((void**) &srcs, sizeof(Coord2D)*path_sz);
-    cudaMallocManaged((void**) &dests, sizeof(Coord2D)*path_sz);
-    cudaMallocManaged((void**) &routes, sizeof(Coord2D)*totalSize);
-//BreakPoint 2
-   getPaths<<<1, 8>>> (routes, sizes, srcs, dests);
-   cudaDeviceSynchronize();
+//Allocate memory for the coordiante arrays to be used when we populate the paths
+    int* routesX = (int*) malloc(sizeof(int)*totalSize);
+    int* routesY = (int*) malloc(sizeof(int)*totalSize);
+
+    int* sizes_d;
+    int* srcs_dx;
+    int* srcs_dy;
+    int* dests_dx;
+    int* dests_dy;
+    int* routes_dx;
+    int* routes_dy;
+
+//numBlocks and block size
+    int blockSize;
+    int numBlocks;
+    if(path_sz-1 > 32){blockSize = 32; numBlocks = ((path_sz-1)/blockSize)+1;}
+    else{blockSize = path_sz-1; numBlocks = 1;}
+ 
+    //Copy sizes to device
+    cudaMalloc((void**) &sizes_d, sizeof(int)*(path_sz-1));
+    cudaMemcpy(sizes_d, sizes_h, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Allocate device memory for srcs and copy to device
+    cudaMalloc((void**) &srcs_dx, sizeof(int)*(path_sz-1));
+    cudaMalloc((void**) &srcs_dy, sizeof(int)*(path_sz-1));
+    cudaMemcpy(srcs_dx, srcsX, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    cudaMemcpy(srcs_dy, srcsY, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Allocate device memory for dests and copy to device
+    cudaMalloc((void**) &dests_dx, sizeof(int)*(path_sz-1));
+    cudaMalloc((void**) &dests_dy, sizeof(int)*(path_sz-1));
+    cudaMemcpy(dests_dx, destsX, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    cudaMemcpy(dests_dy, destsY, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Create Space for routes and copy to device
+    cudaMalloc((void**) &routes_dx, sizeof(int)*totalSize);
+    cudaMalloc((void**) &routes_dy, sizeof(int)*totalSize);
+    cudaMemcpy(routes_dx, routesX, sizeof(int)*totalSize, cudaMemcpyHostToDevice);
+    cudaMemcpy(routes_dy, routesY, sizeof(int)*totalSize, cudaMemcpyHostToDevice);
+
+//kernel call
+    getPaths<<<numBlocks, blockSize>>> (totalSize, routes_dx, routes_dy, srcs_dx, srcs_dy, dests_dx, dests_dy, sizes_d);
+    cudaDeviceSynchronize(); //just to be safe
+
+//Copy memory from device to host
+    cudaMemcpy(routesX, routes_dx, sizeof(int)*totalSize, cudaMemcpyDeviceToHost);
+    cudaMemcpy(routesY, routes_dy, sizeof(int)*totalSize, cudaMemcpyDeviceToHost);
+
+    int x_cnt = 0;
+    int y_cnt = 0;
+//Populate paths
+    for(int i = 0; i < path_sz-1; i++){
+	for(int j = 0; j <= sizes[i]; j++){
+		paths.at(i).addJoint(Coord2D(routesX[x_cnt], routesY[y_cnt]));
+		x_cnt++;
+		y_cnt++;
+        }
+
+    }
+
+//Free memory -- may not be necessary for CPU see the data should die by the block
+    free(sizes);
+    free(sizes_h);
+    free(srcsX);
+    free(srcsY);
+    free(destsX);
+    free(destsY);
+    free(routesX);
+    free(routesY);
+    cudaFree(sizes_d);
+    cudaFree(srcs_dx);
+    cudaFree(srcs_dy);
+    cudaFree(dests_dx);
+    cudaFree(dests_dy);
+    cudaFree(routes_dx);
+    cudaFree(routes_dy);
 }
 
-unsigned int GameGrid2D::determineSize(Coord2D c1, Coord2D c2){
-
-    unsigned int rows = abs(c2.second - c1.second);
-    unsigned int cols = abs(c2.first - c1.first);
-    
+int GameGrid2D::determineSize(Coord2D c1, Coord2D c2){
+    int rows = abs(c2.second - c1.second)+1; //The +1 fixes an off-by-one error
+    int cols = abs(c2.first - c1.first)+1;
     return rows+cols-1;
 }
 

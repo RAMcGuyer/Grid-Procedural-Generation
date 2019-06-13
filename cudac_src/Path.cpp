@@ -1,5 +1,5 @@
 #include "Path.h"
-
+#include <stdio.h>
 using namespace std;
 
 Path::Path(){
@@ -20,6 +20,7 @@ Path::Path(Grid2D* grid, Coord2D src, Coord2D dst, int thickness) {
     	cout << "THIS IS 0"<<endl;
     	exit(1);
     }
+    
     this->grid=grid;
     this->src = src;
     this->dst = dst;
@@ -33,6 +34,14 @@ Path::Path(Grid2D* grid, list<Coord2D> & joints, int thickness) { // FIXME: how 
     this->joints = new list<Coord2D>(joints);
     //this->joints = std::list<Coord2D>(joints);
     this->thickness=thickness;
+}
+
+Path::Path(const Path& p) {
+this->grid = p.grid;
+this->src=p.src;
+this->dst=p.dst;
+this->joints = new list<Coord2D>(*(p.joints));
+this->thickness=p.thickness;
 }
 
 Path::~Path() {

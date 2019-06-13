@@ -19,8 +19,8 @@ using namespace std::chrono;
 
 class GameGrid2D : public Grid2D {
     public:
-        void AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, int grid_sz, int path_sz);
-        unsigned int determineSize(Coord2D c1, Coord2D c2);
+        void AllocateAndCall(vector<Path> &paths, Coord2D* srcs, Coord2D* dests,  int path_sz);
+        int determineSize(Coord2D c1, Coord2D c2);
         void swapSrc(Coord2D* src, Coord2D* dest);
         GameGrid2D(Coord2D dimensions, int thickness, int landmarks) : Grid2D::Grid2D(dimensions) {
             init(thickness, landmarks);
@@ -43,7 +43,7 @@ class GameGrid2D : public Grid2D {
     	std::list<Coord2D> getDistinctRandomPoints(unsigned int amount, std::set<Coord2D>&pointsSet);	
     	std::vector<Path> getFullPath(std::list<Coord2D> landmarks, int thickness);
     	Coord2D getRandomNonBase(); 
-        void populateBestPath(Path& p);
+        
 };    
 
 
