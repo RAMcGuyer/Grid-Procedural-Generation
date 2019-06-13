@@ -329,24 +329,20 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
     for(auto i : landmarks){
         marks.push_back(i);
     } 
-    Path routes[landmarks.size()];
-    Coord2D srcs[landmarks.size()];
-    Coord2D dests[landmarks.size()];
+    Path routes[landmarks.size()-1];
+    Coord2D srcs[landmarks.size()-1];
+    Coord2D dests[landmarks.size()-1];
     //cout <<"gFP before for"<<endl;
-    unsigned int two = 2;	// done to surpress warning from -Wall compiler flag
-    for (unsigned int i = 0; i < landmarks.size() - two; i++) {
-
-        srcs[i] = marks.at(i);
-        dests[i] =  marks.at(i + 1);
-
-	printf("marks[i] = first: %d, second: %d", marks.at(i).first, marks.at(i).second);
-	printf("   marks[i+1] = first: %d, second: %d\n", marks.at(i+1).first, marks.at(i+1).second);
-	printf("srcs[i] = first: %d, second: %d\n", srcs[i].first, srcs[i].second);
-	printf("dests[i] = first: %d, second: %d\n", dests[i].first, dests[i].second);
+    unsigned int one = 1;	// done to surpress warning from -Wall compiler flag
+    for (unsigned int i = 0; i < marks.size() - one; i++) {
+        srcs[i].first = marks.at(i).first;
+        srcs[i].second = marks.at(i).second;
+        dests[i].first =  marks.at(i + 1).first;
+        dests[i].second =  marks.at(i + 1).second;
         routes[i] = Path(this, srcs[i], dests[i], thickness);
     }
 //Break point 0
-    AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, this->getROWS()*this->getCOLS(), landmarks.size());
+    AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, marks.size());
     for(unsigned int k = 0; k < landmarks.size();k++){
 	paths.push_back(routes[k]); //This currently segfaults
     }
@@ -383,30 +379,81 @@ Coord2D GameGrid2D::getRandomNonBase() {
     return Coord2D(x, y);
 }
 
-void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, 
-    int grid_sz, int path_sz){
+void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, int path_sz){
 //Breakpoint 1
-    int* sizes;
-    Coord2D* routes;
+    int* sizes = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* sizes_h = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* srcsX = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* srcsY = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* destsX = (int*) malloc(sizeof(int)*(path_sz-1));
+    int* destsY = (int*) malloc(sizeof(int)*(path_sz-1));
     unsigned int totalSize = 0;
-    for(unsigned i = 0; i < path_sz; i++){
-	sizes[i] = determineSize(srcs[i], dests[i]);
-        totalSize += sizes[i];
+    for(unsigned i = 0; i < path_sz-1; i++){
+	int s = determineSize(srcs[i], dests[i]);
+        sizes[i] = s;
+        totalSize += s;
+        sizes_h[i] = totalSize;
+	srcsX[i] = srcs[i].first; 
+	srcsY[i] = srcs[i].second; 
+	destsX[i] = dests[i].first; 
+	destsY[i] = dests[i].second; 
     }
-    cudaMallocManaged((void**) &sizes, sizeof(int)*path_sz);
-    cudaMallocManaged((void**) &srcs, sizeof(Coord2D)*path_sz);
-    cudaMallocManaged((void**) &dests, sizeof(Coord2D)*path_sz);
-    cudaMallocManaged((void**) &routes, sizeof(Coord2D)*totalSize);
+
+    int* routesX = (int*) malloc(sizeof(int)*totalSize);
+    int* routesY = (int*) malloc(sizeof(int)*totalSize);
+
+    int* sizes_d;
+    int* srcs_dx;
+    int* srcs_dy;
+    int* dests_dx;
+    int* dests_dy;
+    int* routes_dx;
+    int* routes_dy;
+    //Copy sizes to device
+    cudaMalloc((void**) &sizes_d, sizeof(int)*(path_sz-1));
+    cudaMemcpy(sizes_d, sizes_h, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Copy srcs to device
+    cudaMalloc((void**) &srcs_dx, sizeof(int)*(path_sz-1));
+    cudaMalloc((void**) &srcs_dy, sizeof(int)*(path_sz-1));
+    cudaMemcpy(srcs_dx, srcsX, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    cudaMemcpy(srcs_dy, srcsY, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Copy dests to device
+    cudaMalloc((void**) &dests_dx, sizeof(int)*(path_sz-1));
+    cudaMalloc((void**) &dests_dy, sizeof(int)*(path_sz-1));
+    cudaMemcpy(dests_dx, destsX, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    cudaMemcpy(dests_dy, destsY, sizeof(int)*(path_sz-1), cudaMemcpyHostToDevice);
+    //Create Space for routes
+    cudaMalloc((void**) &routes_dx, sizeof(int)*totalSize);
+    cudaMalloc((void**) &routes_dy, sizeof(int)*totalSize);
+    cudaMemcpy(routes_dx, routesX, sizeof(int)*totalSize, cudaMemcpyHostToDevice);
+    cudaMemcpy(routes_dy, routesY, sizeof(int)*totalSize, cudaMemcpyHostToDevice);
 //BreakPoint 2
-   getPaths<<<1, 8>>> (routes, sizes, srcs, dests);
-   cudaDeviceSynchronize();
+    getPaths<<<1, 8>>> (totalSize, routes_dx, routes_dy, srcs_dx, srcs_dy, dests_dx, dests_dy, sizes_d);
+    cudaDeviceSynchronize();
+    cudaMemcpy(routesX, routes_dx, sizeof(int)*totalSize, cudaMemcpyDeviceToHost);
+    cudaMemcpy(routesY, routes_dy, sizeof(int)*totalSize, cudaMemcpyDeviceToHost);
+    for(int i = 0; i < totalSize; i++){
+
+        printf("routesX[%d]: %d   ", i, routesX[i]);
+        printf("routesY[%d]: %d\n", i, routesY[i]);
+    } 
+    int x_cnt = 0;
+    int y_cnt = 0;
+    for(int i = 0; i < path_sz; i++){
+	for(int j = 0; j < sizes[i]; j++){
+		paths[i].joints->push_back(Coord2D(routesX[x_cnt], routesY[y_cnt]));
+		x_cnt++;
+		y_cnt++;
+        }
+
+    }
+    free(sizes);
+    cudaFree(sizes_d);
 }
 
-unsigned int GameGrid2D::determineSize(Coord2D c1, Coord2D c2){
-
-    unsigned int rows = abs(c2.second - c1.second);
-    unsigned int cols = abs(c2.first - c1.first);
-    
+int GameGrid2D::determineSize(Coord2D c1, Coord2D c2){
+    int rows = abs(c2.second - c1.second)+1;
+    int cols = abs(c2.first - c1.first)+1;
     return rows+cols-1;
 }
 
