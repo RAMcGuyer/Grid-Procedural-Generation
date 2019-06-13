@@ -69,7 +69,6 @@ void GameGrid2D::populateBestPath(Path& p) {
     int numVertices = tempGridCols*tempGridRows; // numVertices should be total num of tiles in grid; numVertices = rows*cols
     int edgesMat[numVertices][numVertices];
     int edgesArr[numVertices*numVertices]; // flattened version of edgesMatrix
-    // pair<int, pair<int,int> > distances[numVertices]; // distances holds pairs containing distance from src and a pair of location coordinates for that tile
     int distances[numVertices]; // initialized in kernel
 
     threadsPerBlock = 256; // each thread handles an edge
@@ -129,13 +128,13 @@ void GameGrid2D::populateBestPath(Path& p) {
     // exit(0);
 
     // initialize distances[]
-
+    int distances2[numVertices];
 
     cudaError_t cuda_ret;
 
     cudaDeviceSynchronize();
 
-    bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edgesArr, distances);
+    bellman_ford(blocksPerGrid, threadsPerBlock, numVertices, edgesArr, distances2);
 
     cuda_ret = cudaDeviceSynchronize();
     if(cuda_ret != cudaSuccess) {
@@ -143,12 +142,55 @@ void GameGrid2D::populateBestPath(Path& p) {
     }
 
     cout << "RETURN FROM KERNEL" << endl;
+
+
+    /////////////////////////////////////////////////////////////////////////////
+    // create 2D array
+    // int** tempArray2D;
+    int array2D[tempGridRows][tempGridCols];
+    int hCounter = 0;
+    int wCounter = 0;
+    for (int height = 0; height < tempGridRows; height++)
+    {
+        // array2D[height] = new int [p];
+        
+        for (int width = 0; width < tempGridCols; width++)
+        {
+            array2D[height][width] = wCounter++;
+        }
+
+        hCounter++;
+        wCounter = hCounter;
+    }
+
+    // convert it to distances
+    i = 0;
+    for(int* it = &array2D[0][0]; it != &array2D[0][0]+numVertices; ++it) {
+        distances[i++] = *it;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+
     cout << "tempGrid dim: " << tempGridRows << " x "<< tempGridCols <<endl;
+    cout << "distances2[]:" << endl;
     for (i = 0; i < numVertices; ++i) {
         if(i % tempGridCols == 0) {
             cout << endl;
         }
-        if(distances[i] < 10) {
+        if(distances2[i] < 10) { // for output spacing
+            cout << distances2[i] << "   ";
+        }
+        else {
+            cout << distances2[i] << "  ";
+        }
+    }
+    cout << endl;
+
+    cout << "distances[]:" << endl;
+    for (i = 0; i < numVertices; ++i) {
+        if(i % tempGridCols == 0) {
+            cout << endl;
+        }
+        if(distances[i] < 10) { // for output spacing
             cout << distances[i] << "   ";
         }
         else {
@@ -156,110 +198,34 @@ void GameGrid2D::populateBestPath(Path& p) {
         }
     }
     cout << endl;
-    exit(0);
+    // exit(0);
 
     /** distances[] has shortest dist from start to other nodes
       * distances[0] dist to src (which is 0)
       * distances[numVertices-1] is distance to dst
       * We can construct the shortest path from src to dst with this information
     */
-    int optimalPathDist = distances[numVertices-1]; // opt path should have this length
-    int currentDist = 0;
-    vector<Coord2D> pathJoints(); // holds joints that make up the shortest path
 
-    // while(pathJoints.size() < optimalPathDist) {
-    //     for(i = 0; i < optimalPathDist) {
-    //         if(currentDist + distances[i] > optimalPathDist) {
-    //             continue; // optimalPathDist exceeded if included; do not add
-    //         }
-    //         else if(currentDist + distances[i] == optimalPathDist && i != numVertices-1) {
-    //             continue; // this path meets optimalPathDist, but doesnt end at dst
-    //         }
-    //         else {
-    //             // currentDist + distances[i] is less than optimalPathDist, so keep building path
-
-    //         }
-    //     }
-    // }
-    int next;
-    while(Condition) {
-        for (i = 0; i < numVertices; ++i) {
-            next = distances[i];
-            if(next == currentDist + 1) {
-                //move there
-                current = next;
-                pathJoints.push_back(next);
-            }
-        }
-        
-    }
-
-    /*BEGIN DIJKSTRAS
-    
-    while(!setQ.empty()) {
-        int runningMin = INT_MAX;
-
-        // here the first tile's distance should be 0
-        for (Tile* t : setQ) {
-            if(t->getDistance() < runningMin) {
-                // cout<<"TEST"<<endl;
-                runningMin = t->getDistance();
-                uTile = t;
-            }
-        }
-
-        if(uTile == NULL) {
-            cout << "Minimum distance tile uTile not properly set" << endl;
-            exit(1);
-        }
-        if(setQ.find(uTile) == setQ.end()) {
-            cout << "setQ doesn't contain uTile " << uTile->toString() << endl;
-            exit(1);
-        }
-        setQ.erase(uTile);
-
-        if(uTile == destTile) { 
-            break;
-        }
-
-        set<Tile*> uNeighbors = tempGrid->getTraversableNeighbors(*uTile->getLocation());
-
-        for (Tile* thisNeighbor : uNeighbors) {
-            int currentDist = uTile->getDistance() + 1;
-            if (currentDist < thisNeighbor->getDistance()) {
-                thisNeighbor->setDistance(currentDist);
-                thisNeighbor->setPreviousTile(uTile);
-            }
+    int next = 0;
+    int current = 0;
+    int arr2[numVertices];
+    arr2[0] = 0;
+    j = 1;
+    for (int i = 0; i < numVertices; ++i) {
+        next = distances[i];
+        if(next == current+1) {
+            // move there
+            current++;
+            arr2[j++] = i;
         }
     }
-    // END DIJKSTRAS*/
+    cout << "tiles:" << endl;
+    for(i = 0; i <= distances[numVertices-1]; ++i) {
+        cout << arr2[i] << " ";
+    }
+    cout << endl;
+    exit(0);
 
-    // if (uTile->getPreviousTile() == NULL && uTile != srcTile) {
-    //     cout << "Condition specified by Dijkstra's not met" << endl;
-    //     exit(1);
-    // }
-
-    // while(uTile != NULL) {
-    //     p.joints->push_back(*uTile->getLocation());
-    //     uTile = uTile->getPreviousTile();
-
-    //     bool arePointsSame = (p.src == p.dst);
-
-    //     if (uTile == NULL && p.joints->size() < 2) {
-    //         cerr << "Not enough prev's? For sure not enough joints\nPerhaps src and dest are the same?\nsrc: " << coord_to_string(p.src) << "\n" <<
-    //         "dest: " << coord_to_string(p.dst) << "\n" <<
-    //         "src.equals(dest)? " << arePointsSame;
-
-    //         exit(1);
-    //     }
-    // }
-    // // delete tempGrid
-    // /*for(unsigned i = 0; i < tempGrid->grid->size();++i) {
-    //     for(unsigned j = 0; j < tempGrid->grid->at(i).size();++j) {
-    //         delete tempGrid->grid->at(i).at(j);
-    //     }
-    // }*/
-    // delete tempGrid;
 } //End populateBestPath
 
 void GameGrid2D::drawBases() {
