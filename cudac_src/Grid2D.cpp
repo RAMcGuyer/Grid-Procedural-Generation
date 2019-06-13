@@ -397,8 +397,8 @@ void Grid2D::setTypeLine(Coord2D point1, Coord2D point2, Tile::TileType type, in
 				setTypeLine(point1Layered, point2Layered, type, prioritize);
 		}
 
-		else
-			assert(false);
+		//else
+			//assert(false);
 	}
 }
 
