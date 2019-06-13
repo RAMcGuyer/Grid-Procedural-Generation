@@ -434,14 +434,14 @@ void GameGrid2D::AllocateAndCall(vector<Path> &paths, Coord2D* srcs, Coord2D* de
     cudaMemcpy(routesY, routes_dy, sizeof(int)*totalSize, cudaMemcpyDeviceToHost);
     for(int i = 0; i < totalSize; i++){
 
-        printf("routesX[%d]: %d   ", i, routesX[i]);
-        printf("routesY[%d]: %d\n", i, routesY[i]);
+    //    printf("routesX[%d]: %d   ", i, routesX[i]);
+    //    printf("routesY[%d]: %d\n", i, routesY[i]);
     } 
     int x_cnt = 0;
     int y_cnt = 0;
     for(int i = 0; i < path_sz-1; i++){
 	for(int j = 0; j <= sizes[i]; j++){
-                printf("In path allocation loop level %d\n", x_cnt);
+      //          printf("In path allocation loop level %d\n", x_cnt);
 		paths.at(i).addJoint(Coord2D(routesX[x_cnt], routesY[y_cnt]));
 		x_cnt++;
 		y_cnt++;
