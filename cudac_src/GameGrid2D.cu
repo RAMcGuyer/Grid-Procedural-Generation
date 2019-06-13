@@ -442,7 +442,7 @@ void GameGrid2D::AllocateAndCall(vector<Path> &paths, Coord2D* srcs, Coord2D* de
     for(int i = 0; i < path_sz-1; i++){
 	for(int j = 0; j <= sizes[i]; j++){
                 printf("In path allocation loop level %d\n", x_cnt);
-		paths.at(i).joints->push_back(Coord2D(routesX[x_cnt], routesY[y_cnt]));
+		paths.at(i).addJoint(Coord2D(routesX[x_cnt], routesY[y_cnt]));
 		x_cnt++;
 		y_cnt++;
         }
