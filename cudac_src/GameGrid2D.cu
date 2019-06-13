@@ -329,7 +329,7 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
     for(auto i : landmarks){
         marks.push_back(i);
     } 
-    Path routes[landmarks.size()-1];
+    vector<Path> routes;
     Coord2D srcs[landmarks.size()-1];
     Coord2D dests[landmarks.size()-1];
     //cout <<"gFP before for"<<endl;
@@ -339,12 +339,12 @@ vector<Path> GameGrid2D::getFullPath(list<Coord2D> landmarks, int thickness) {
         srcs[i].second = marks.at(i).second;
         dests[i].first =  marks.at(i + 1).first;
         dests[i].second =  marks.at(i + 1).second;
-        routes[i] = Path(this, srcs[i], dests[i], thickness);
+        routes.push_back(Path(this,srcs[i], dests[i], thickness));
     }
 //Break point 0
     AllocateAndCall(routes,(Coord2D*) &srcs,(Coord2D*) &dests, marks.size());
-    for(unsigned int k = 0; k < landmarks.size();k++){
-	paths.push_back(routes[k]); //This currently segfaults
+    for(unsigned int k = 0; k < marks.size()-1;k++){
+	paths.push_back(routes.at(k)); //This currently segfaults
     }
     return paths;
 }
@@ -379,7 +379,7 @@ Coord2D GameGrid2D::getRandomNonBase() {
     return Coord2D(x, y);
 }
 
-void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, int path_sz){
+void GameGrid2D::AllocateAndCall(vector<Path> &paths, Coord2D* srcs, Coord2D* dests, int path_sz){
 //Breakpoint 1
     int* sizes = (int*) malloc(sizeof(int)*(path_sz-1));
     int* sizes_h = (int*) malloc(sizeof(int)*(path_sz-1));
@@ -439,9 +439,10 @@ void GameGrid2D::AllocateAndCall(Path paths[], Coord2D* srcs, Coord2D* dests, in
     } 
     int x_cnt = 0;
     int y_cnt = 0;
-    for(int i = 0; i < path_sz; i++){
-	for(int j = 0; j < sizes[i]; j++){
-		paths[i].joints->push_back(Coord2D(routesX[x_cnt], routesY[y_cnt]));
+    for(int i = 0; i < path_sz-1; i++){
+	for(int j = 0; j <= sizes[i]; j++){
+                printf("In path allocation loop level %d\n", x_cnt);
+		paths.at(i).joints->push_back(Coord2D(routesX[x_cnt], routesY[y_cnt]));
 		x_cnt++;
 		y_cnt++;
         }
