@@ -29,7 +29,7 @@ void testGenerateGameGrid(int numOfGrids) {
         {
             std::cerr << e.what() << '\n';
         }
-        GameGrid2D grid = GameGrid2D(gridDimensions, 5, 7);
+        GameGrid2D grid = GameGrid2D(gridDimensions, 5, 7); // (grid dimensions, path width, number of landmarks)
         cout << "Grid #" << i << "\n" << grid.toString() << "\n" << endl;
     }
 }
